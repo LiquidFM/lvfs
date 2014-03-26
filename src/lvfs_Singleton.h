@@ -17,27 +17,29 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lvfs_Error.h"
+#ifndef LVFS_SINGLETON_H_
+#define LVFS_SINGLETON_H_
 
-#include <cstring>
+#include <platform/utils.h>
+#include <lvfs/Interface>
+#include <lvfs/Error>
 
 
 namespace LVFS {
 
-Error::Error() :
-    m_code(0)
-{}
-
-Error::Error(int code) :
-    m_code(code)
-{}
-
-Error::~Error()
-{}
-
-const char *Error::description() const
+class Singleton
 {
-    return strerror(m_code);
-}
+    PLATFORM_MAKE_NONCOPYABLE(Singleton)
+    PLATFORM_MAKE_NONMOVEABLE(Singleton)
+    PLATFORM_MAKE_STACK_ONLY
+
+public:
+    Singleton();
+    ~Singleton();
+
+    static Interface::Holder open(const char *uri, Error &error);
+};
 
 }
+
+#endif /* LVFS_SINGLETON_H_ */

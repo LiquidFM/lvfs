@@ -17,27 +17,32 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lvfs_Error.h"
+#ifndef LVFS_IROOTPLUGIN_H_
+#define LVFS_IROOTPLUGIN_H_
 
-#include <cstring>
+#include <lvfs/Error>
+#include <lvfs/Interface>
+#include <lvfs/plugins/IPlugin>
 
 
 namespace LVFS {
+class IPluginManager;
 
-Error::Error() :
-    m_code(0)
-{}
 
-Error::Error(int code) :
-    m_code(code)
-{}
-
-Error::~Error()
-{}
-
-const char *Error::description() const
+class IRootPlugin : public IPlugin
 {
-    return strerror(m_code);
-}
+    PLATFORM_MAKE_NONCOPYABLE(IRootPlugin)
+    PLATFORM_MAKE_NONMOVEABLE(IRootPlugin)
+    PLATFORM_MAKE_STACK_ONLY
+
+public:
+    IRootPlugin();
+    virtual ~IRootPlugin();
+
+    virtual const char *schema() const = 0;
+    virtual Interface::Holder open(const char *uri, Error &error) const = 0;
+};
 
 }
+
+#endif /* LVFS_IROOTPLUGIN_H_ */

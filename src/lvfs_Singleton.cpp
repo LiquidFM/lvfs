@@ -17,27 +17,35 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lvfs_Error.h"
+#include "lvfs_Singleton.h"
+#include "plugins/default/lvfs_default_RootPlugin.h"
 
-#include <cstring>
+#include <brolly/assert.h>
 
 
 namespace LVFS {
+namespace {
+    static Singleton *s_instance;
 
-Error::Error() :
-    m_code(0)
-{}
+    LVFS::RootPlugin defaultPlugin;
+}
 
-Error::Error(int code) :
-    m_code(code)
-{}
 
-Error::~Error()
-{}
-
-const char *Error::description() const
+Singleton::Singleton()
 {
-    return strerror(m_code);
+    ASSERT(s_instance == NULL);
+    s_instance = this;
+}
+
+Singleton::~Singleton()
+{
+    ASSERT(s_instance == this);
+    s_instance = NULL;
+}
+
+Interface::Holder Singleton::open(const char *uri, Error &error)
+{
+    return defaultPlugin.open(uri, error);
 }
 
 }

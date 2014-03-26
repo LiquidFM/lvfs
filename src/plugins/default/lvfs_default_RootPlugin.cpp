@@ -17,27 +17,31 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lvfs_Error.h"
-
-#include <cstring>
+#include "lvfs_default_RootPlugin.h"
+#include "lvfs_default_DefaultFile.h"
 
 
 namespace LVFS {
 
-Error::Error() :
-    m_code(0)
+RootPlugin::RootPlugin()
 {}
 
-Error::Error(int code) :
-    m_code(code)
+RootPlugin::~RootPlugin()
 {}
 
-Error::~Error()
-{}
-
-const char *Error::description() const
+const char *RootPlugin::schema() const
 {
-    return strerror(m_code);
+    return "file";
+}
+
+Interface::Holder RootPlugin::open(const char *uri, Error &error) const
+{
+    return DefaultFile::open(uri, error);
+}
+
+void RootPlugin::registered()
+{
+
 }
 
 }

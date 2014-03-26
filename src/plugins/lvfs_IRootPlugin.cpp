@@ -17,27 +17,15 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lvfs_Error.h"
-
-#include <cstring>
+#include "lvfs_IRootPlugin.h"
 
 
 namespace LVFS {
 
-Error::Error() :
-    m_code(0)
+IRootPlugin::IRootPlugin()
 {}
 
-Error::Error(int code) :
-    m_code(code)
+IRootPlugin::~IRootPlugin()
 {}
-
-Error::~Error()
-{}
-
-const char *Error::description() const
-{
-    return strerror(m_code);
-}
 
 }

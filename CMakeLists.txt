@@ -14,4 +14,4 @@ target_link_libraries (lvfs ${${PROJECT_NAME}_LIBS})
 build_version_file (lvfs 0.0.1)
 
 # Documentation
-add_documentation ("liquidDB" 0.0.1 "This library is a front-end for SQLite database")
+add_documentation ("LVFS" 0.0.1 "Liquid Virtual File System")

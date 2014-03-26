@@ -17,27 +17,27 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lvfs_Error.h"
+#ifndef LVFS_IPLUGIN_H_
+#define LVFS_IPLUGIN_H_
 
-#include <cstring>
+#include <platform/utils.h>
 
 
 namespace LVFS {
 
-Error::Error() :
-    m_code(0)
-{}
-
-Error::Error(int code) :
-    m_code(code)
-{}
-
-Error::~Error()
-{}
-
-const char *Error::description() const
+class IPlugin
 {
-    return strerror(m_code);
-}
+    PLATFORM_MAKE_NONCOPYABLE(IPlugin)
+    PLATFORM_MAKE_NONMOVEABLE(IPlugin)
+    PLATFORM_MAKE_STACK_ONLY
+
+public:
+    IPlugin();
+    virtual ~IPlugin();
+
+    virtual void registered() = 0;
+};
 
 }
+
+#endif /* LVFS_IPLUGIN_H_ */

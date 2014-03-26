@@ -17,27 +17,32 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lvfs_Error.h"
+#ifndef LVFS_DEFAULT_IPERMISSIONS_H_
+#define LVFS_DEFAULT_IPERMISSIONS_H_
 
-#include <cstring>
+#include <lvfs/Interface>
 
 
 namespace LVFS {
 
-Error::Error() :
-    m_code(0)
-{}
-
-Error::Error(int code) :
-    m_code(code)
-{}
-
-Error::~Error()
-{}
-
-const char *Error::description() const
+class IPermissions
 {
-    return strerror(m_code);
-}
+    DECLARE_INTERFACE(LVFS::IPermissions)
+
+public:
+    enum
+    {
+        Read  = 0x1,
+        Write = 0x1 << 1,
+        Exec  = 0x1 << 2
+    };
+
+public:
+    virtual ~IPermissions();
+
+    virtual int permissions() const = 0;
+};
 
 }
+
+#endif /* LVFS_DEFAULT_IPERMISSIONS_H_ */

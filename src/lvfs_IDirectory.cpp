@@ -17,27 +17,18 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lvfs_Error.h"
-
-#include <cstring>
+#include "lvfs_IDirectory.h"
 
 
 namespace LVFS {
 
-Error::Error() :
-    m_code(0)
+IDirectory::const_iterator::Implementation::Implementation()
 {}
 
-Error::Error(int code) :
-    m_code(code)
+IDirectory::const_iterator::Implementation::~Implementation()
 {}
 
-Error::~Error()
+IDirectory::~IDirectory()
 {}
-
-const char *Error::description() const
-{
-    return strerror(m_code);
-}
 
 }

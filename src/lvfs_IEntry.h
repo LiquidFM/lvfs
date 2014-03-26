@@ -20,25 +20,20 @@
 #ifndef LVFS_IENTRY_H_
 #define LVFS_IENTRY_H_
 
-#include <cstddef>
+#include <lvfs/Interface>
 
 
 namespace LVFS {
 
 class IEntry
 {
+    DECLARE_INTERFACE(LVFS::IEntry)
+
 public:
     virtual ~IEntry();
 
     virtual const char *title() const = 0;
     virtual const char *type() const = 0;
-
-    virtual bool open() = 0;
-    virtual size_t read(void *buffer, size_t size) = 0;
-    virtual size_t write(const void *buffer, size_t size) = 0;
-    virtual void close() = 0;
-
-    virtual bool rename(const char *fileName) = 0;
 };
 
 }

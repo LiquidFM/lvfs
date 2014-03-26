@@ -17,27 +17,44 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lvfs_Error.h"
+#ifndef LVFS_PACKAGE_H_
+#define LVFS_PACKAGE_H_
 
-#include <cstring>
+#include <lvfs/plugins/IPlugin>
+#include <lvfs/plugins/IRootPlugin>
 
 
 namespace LVFS {
 
-Error::Error() :
-    m_code(0)
-{}
-
-Error::Error(int code) :
-    m_code(code)
-{}
-
-Error::~Error()
-{}
-
-const char *Error::description() const
+class Package
 {
-    return strerror(m_code);
-}
+    PLATFORM_MAKE_NONCOPYABLE(Package)
+    PLATFORM_MAKE_NONMOVEABLE(Package)
+    PLATFORM_MAKE_STACK_ONLY
+
+public:
+    struct DataPlugin
+    {
+        const char *type;
+        const IPlugin *plugin;
+        const DataPlugin *next;
+    };
+
+    struct RootPlugin
+    {
+        const char *schema;
+        const IRootPlugin *plugin;
+        const RootPlugin *next;
+    };
+
+public:
+    Package();
+    virtual ~Package();
+
+    virtual const DataPlugin *dataPlugins() const = 0;
+    virtual const RootPlugin *rootPlugins() const = 0;
+};
 
 }
+
+#endif /* LVFS_PACKAGE_H_ */

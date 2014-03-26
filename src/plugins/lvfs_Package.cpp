@@ -17,27 +17,15 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lvfs_Error.h"
-
-#include <cstring>
+#include "lvfs_Package.h"
 
 
 namespace LVFS {
 
-Error::Error() :
-    m_code(0)
+Package::Package()
 {}
 
-Error::Error(int code) :
-    m_code(code)
+Package::~Package()
 {}
-
-Error::~Error()
-{}
-
-const char *Error::description() const
-{
-    return strerror(m_code);
-}
 
 }

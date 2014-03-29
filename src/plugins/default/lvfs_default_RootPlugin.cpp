@@ -29,11 +29,6 @@ RootPlugin::RootPlugin()
 RootPlugin::~RootPlugin()
 {}
 
-const char *RootPlugin::schema() const
-{
-    return "file";
-}
-
 Interface::Holder RootPlugin::open(const char *uri, Error &error) const
 {
     return DefaultFile::open(uri, error);

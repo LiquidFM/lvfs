@@ -36,7 +36,6 @@ public:
     RootPlugin();
     virtual ~RootPlugin();
 
-    virtual const char *schema() const;
     virtual Interface::Holder open(const char *uri, Error &error) const;
 
     virtual void registered();

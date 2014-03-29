@@ -26,8 +26,6 @@
 
 
 namespace LVFS {
-class IPluginManager;
-
 
 class IRootPlugin : public IPlugin
 {
@@ -39,7 +37,6 @@ public:
     IRootPlugin();
     virtual ~IRootPlugin();
 
-    virtual const char *schema() const = 0;
     virtual Interface::Holder open(const char *uri, Error &error) const = 0;
 };
 

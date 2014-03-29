@@ -46,7 +46,7 @@ public:
 
     virtual int permissions() const;
 
-    /* IDefaultFile */
+    /* IFile */
 
     virtual bool open();
     virtual size_t read(void *buffer, size_t size);

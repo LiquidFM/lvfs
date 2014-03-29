@@ -44,7 +44,8 @@ namespace { typedef EFC::Holder<Interface> InterfaceHolder; }
 class Interface : public InterfaceHolder::Data
 {
 public:
-    typedef InterfaceHolder Holder;
+    typedef InterfaceHolder   Holder;
+    template <typename> class Adaptor;
 
 public:
     inline Interface()
@@ -69,6 +70,24 @@ protected:
 
 private:
     Holder m_parent;
+};
+
+
+template <typename T>
+class Interface::Adaptor
+{
+public:
+    explicit Adaptor(const Interface::Holder &interface) :
+        m_interface(interface->as<T>())
+    {}
+
+    bool isValid() const { return m_interface != NULL; }
+
+    T &operator*() const { return *m_interface; }
+    T *operator->() const { return m_interface; }
+
+private:
+    T *m_interface;
 };
 
 

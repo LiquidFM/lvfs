@@ -20,7 +20,7 @@
 #ifndef LVFS_PACKAGE_H_
 #define LVFS_PACKAGE_H_
 
-#include <lvfs/plugins/IPlugin>
+#include <lvfs/plugins/IDataPlugin>
 #include <lvfs/plugins/IRootPlugin>
 
 
@@ -36,21 +36,20 @@ public:
     struct DataPlugin
     {
         const char *type;
-        const IPlugin *plugin;
-        const DataPlugin *next;
+        const IDataPlugin *plugin;
     };
 
     struct RootPlugin
     {
         const char *schema;
         const IRootPlugin *plugin;
-        const RootPlugin *next;
     };
 
 public:
     Package();
     virtual ~Package();
 
+    virtual const char *name() const = 0;
     virtual const DataPlugin *dataPlugins() const = 0;
     virtual const RootPlugin *rootPlugins() const = 0;
 };

@@ -77,6 +77,9 @@ template <typename T>
 class Interface::Adaptor
 {
 public:
+    Adaptor() :
+        m_interface(NULL)
+    {}
     explicit Adaptor(const Interface::Holder &interface) :
         m_interface(interface->as<T>())
     {}

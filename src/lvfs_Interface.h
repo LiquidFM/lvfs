@@ -57,13 +57,17 @@ public:
 
     const Holder &parent() const { return m_parent; }
 
-    template <typename Interface>
-    const Interface *as() const
-    { return static_cast<const Interface *>(const_cast<Interface *>(this)->interface(Interface::interfaceId())); }
+    template <typename R>
+    R *as() const
+    { return static_cast<R *>(const_cast<Interface *>(this)->interface(R::interfaceId())); }
 
-    template <typename Interface>
-    Interface *as()
-    { return static_cast<Interface *>(interface(Interface::interfaceId())); }
+    template <typename R>
+    R *as()
+    { return static_cast<R *>(interface(R::interfaceId())); }
+
+    template <typename R>
+    inline const R *as_const() const
+    { return static_cast<const R *>(const_cast<Interface *>(this)->interface(R::interfaceId())); }
 
 protected:
     virtual void *interface(uint32_t id) = 0;

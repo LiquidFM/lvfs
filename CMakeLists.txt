@@ -8,7 +8,7 @@ add_subdirectory (src)
 
 # Target - lvfs
 add_library(lvfs STATIC ${${PROJECT_NAME}_SOURCES})
-target_link_libraries (lvfs ${${PROJECT_NAME}_LIBS})
+target_link_libraries (lvfs ${${PROJECT_NAME}_LIBS} dl)
 
 # Version
 build_version_file (lvfs 0.0.1)

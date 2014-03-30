@@ -26,7 +26,7 @@
 
 
 #define DECLARE_PLUGIN(CLASS)                    \
-    extern "C" PLATFORM_PUBLIC_SYMBOL            \
+    extern "C" PLATFORM_MAKE_PUBLIC              \
     const ::LVFS::Package *lvfs_plugin_package() \
     {                                            \
         static const CLASS package;              \
@@ -36,7 +36,7 @@
 
 namespace LVFS {
 
-class Package
+class PLATFORM_MAKE_PUBLIC Package
 {
     PLATFORM_MAKE_NONCOPYABLE(Package)
     PLATFORM_MAKE_NONMOVEABLE(Package)
@@ -62,8 +62,8 @@ public:
     virtual ~Package();
 
     virtual const char *name() const = 0;
-    virtual const DataPlugin *dataPlugins() const = 0;
-    virtual const RootPlugin *rootPlugins() const = 0;
+    virtual const DataPlugin **dataPlugins() const = 0;
+    virtual const RootPlugin **rootPlugins() const = 0;
 };
 
 }

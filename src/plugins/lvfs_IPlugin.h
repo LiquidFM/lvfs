@@ -25,7 +25,7 @@
 
 namespace LVFS {
 
-class IPlugin
+class PLATFORM_MAKE_PUBLIC IPlugin
 {
     PLATFORM_MAKE_NONCOPYABLE(IPlugin)
     PLATFORM_MAKE_NONMOVEABLE(IPlugin)

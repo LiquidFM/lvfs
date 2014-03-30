@@ -21,23 +21,74 @@
 #define LVFS_SINGLETON_H_
 
 #include <platform/utils.h>
-#include <lvfs/Interface>
+
+#include <efc/Map>
+#include <efc/List>
+
 #include <lvfs/Error>
+#include <lvfs/Interface>
+#include <lvfs/plugins/Package>
 
 
 namespace LVFS {
 
-class Singleton
+class PLATFORM_MAKE_PUBLIC Singleton
 {
     PLATFORM_MAKE_NONCOPYABLE(Singleton)
     PLATFORM_MAKE_NONMOVEABLE(Singleton)
     PLATFORM_MAKE_STACK_ONLY
 
 public:
+    class Error : public ::LVFS::Error
+    {
+    public:
+        Error();
+        Error(int code);
+        virtual ~Error();
+    };
+
+public:
     Singleton();
     ~Singleton();
 
     static Interface::Holder open(const char *uri, Error &error);
+
+private:
+    Interface::Holder internalOpen(const char *uri, Error &error);
+    void processPlugin(const char *fileName);
+
+private:
+    struct Plugin
+    {
+        void *handle;
+        const Package *package;
+    };
+
+    class String
+    {
+    public:
+        String() :
+            m_string("")
+        {}
+
+        String(const char *string) :
+            m_string(string)
+        {}
+
+        ~String()
+        {}
+
+        bool operator<(const String &other) const;
+        bool operator==(const String &other) const;
+
+    private:
+        const char *m_string;
+    };
+
+private:
+    ::EFC::List<Plugin> m_plugins;
+    ::EFC::Map<String, ::EFC::List<const IDataPlugin *>> m_dataPlugins;
+    ::EFC::Map<String, ::EFC::List<const IRootPlugin *>> m_rootPlugins;
 };
 
 }

@@ -25,7 +25,7 @@
 
 namespace LVFS {
 
-class IEntry
+class PLATFORM_MAKE_PUBLIC IEntry
 {
     DECLARE_INTERFACE(LVFS::IEntry)
 

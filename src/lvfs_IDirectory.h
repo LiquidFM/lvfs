@@ -34,7 +34,7 @@ namespace LVFS {
  * XXX: This is not a directory on your HDD/SSD.
  * It's just a list of entries.
  */
-class IDirectory
+class PLATFORM_MAKE_PUBLIC IDirectory
 {
     DECLARE_INTERFACE(LVFS::IDirectory)
 

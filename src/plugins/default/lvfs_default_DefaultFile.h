@@ -33,7 +33,7 @@ struct stat;
 
 namespace LVFS {
 
-class DefaultFile : public IFsFile, public IFile, public IDirectory, public IEntry
+class PLATFORM_MAKE_PRIVATE DefaultFile : public IFsFile, public IFile, public IDirectory, public IEntry
 {
 public:
     DefaultFile(const char *fileName);

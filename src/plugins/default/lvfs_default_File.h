@@ -25,7 +25,7 @@
 
 namespace LVFS {
 
-class File : public Implements<IFsFile, IFile, IEntry>
+class PLATFORM_MAKE_PRIVATE File : public Implements<IFsFile, IFile, IEntry>
 {
 public:
     File(const char *fileName);

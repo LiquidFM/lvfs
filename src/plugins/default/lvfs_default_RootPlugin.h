@@ -25,7 +25,7 @@
 
 namespace LVFS {
 
-class RootPlugin : public IRootPlugin
+class PLATFORM_MAKE_PRIVATE RootPlugin : public IRootPlugin
 {
     PLATFORM_MAKE_NONCOPYABLE(RootPlugin)
     PLATFORM_MAKE_NONMOVEABLE(RootPlugin)

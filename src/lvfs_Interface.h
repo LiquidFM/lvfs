@@ -22,7 +22,7 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <platform/platform.h>
+#include <platform/utils.h>
 #include <efc/Holder>
 
 

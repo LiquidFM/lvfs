@@ -30,7 +30,7 @@ namespace LVFS {
 /**
  * XXX: This is a file on your HDD/SSD.
  */
-class IFsFile
+class PLATFORM_MAKE_PUBLIC IFsFile
 {
     DECLARE_INTERFACE(LVFS::IFsFile)
 

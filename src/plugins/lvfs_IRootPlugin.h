@@ -27,7 +27,7 @@
 
 namespace LVFS {
 
-class IRootPlugin : public IPlugin
+class PLATFORM_MAKE_PUBLIC IRootPlugin : public IPlugin
 {
     PLATFORM_MAKE_NONCOPYABLE(IRootPlugin)
     PLATFORM_MAKE_NONMOVEABLE(IRootPlugin)

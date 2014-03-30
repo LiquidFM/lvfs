@@ -32,7 +32,7 @@ namespace LVFS {
  * XXX: This is not a file on your HDD/SSD.
  * It's just a readable/writeable entry.
  */
-class IFile
+class PLATFORM_MAKE_PUBLIC IFile
 {
     DECLARE_INTERFACE(LVFS::IFile)
 

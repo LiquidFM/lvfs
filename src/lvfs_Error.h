@@ -20,10 +20,12 @@
 #ifndef LVFS_ERROR_H_
 #define LVFS_ERROR_H_
 
+#include <platform/utils.h>
+
 
 namespace LVFS {
 
-class Error
+class PLATFORM_MAKE_PUBLIC Error
 {
 public:
     Error();

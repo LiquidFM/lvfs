@@ -25,7 +25,7 @@
 
 namespace LVFS {
 
-class Directory : public Implements<IFsFile, IDirectory, IEntry>
+class PLATFORM_MAKE_PRIVATE Directory : public Implements<IFsFile, IDirectory, IEntry>
 {
 public:
     Directory(const char *fileName);

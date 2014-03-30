@@ -84,15 +84,14 @@ Interface::Holder Singleton::internalOpen(const char *uri, Error &error)
         {
             memcpy(buffer, uri, delim - uri);
             buffer[delim - uri] = 0;
+            uri = delim + sizeof(schema_delim) - 1;
 
             auto root = m_rootPlugins.find(buffer);
 
-            if (root == m_rootPlugins.end())
-                return Interface::Holder();
-            else
+            if (root != m_rootPlugins.end())
                 for (auto i : (*root).second)
                 {
-                    res = i->open(delim + sizeof(schema_delim) - 1);
+                    res = i->open(uri);
 
                     if (res.isValid())
                         break;

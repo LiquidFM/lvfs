@@ -29,9 +29,14 @@ RootPlugin::RootPlugin()
 RootPlugin::~RootPlugin()
 {}
 
-Interface::Holder RootPlugin::open(const char *uri, Error &error) const
+Interface::Holder RootPlugin::open(const char *uri) const
 {
-    return DefaultFile::open(uri, error);
+    return DefaultFile::open(uri, m_error);
+}
+
+const Error &RootPlugin::lastError() const
+{
+    return m_error;
 }
 
 void RootPlugin::registered()

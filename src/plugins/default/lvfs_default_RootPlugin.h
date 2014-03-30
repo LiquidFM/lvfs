@@ -20,7 +20,6 @@
 #ifndef LVFS_DEFAULT_ROOTPLUGIN_H_
 #define LVFS_DEFAULT_ROOTPLUGIN_H_
 
-#include <lvfs/Error>
 #include <lvfs/plugins/IRootPlugin>
 
 
@@ -36,9 +35,13 @@ public:
     RootPlugin();
     virtual ~RootPlugin();
 
-    virtual Interface::Holder open(const char *uri, Error &error) const;
+    virtual Interface::Holder open(const char *uri) const;
+    virtual const Error &lastError() const;
 
     virtual void registered();
+
+private:
+    mutable Error m_error;
 };
 
 }

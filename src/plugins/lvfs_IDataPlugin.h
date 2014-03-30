@@ -37,7 +37,8 @@ public:
     IDataPlugin();
     virtual ~IDataPlugin();
 
-    virtual Interface::Holder open(const Interface::Holder &file, Error &error) const = 0;
+    virtual Interface::Holder open(const Interface::Holder &file) const = 0;
+    virtual const Error &lastError() const = 0;
 };
 
 }

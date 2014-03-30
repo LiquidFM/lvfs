@@ -37,7 +37,8 @@ public:
     IRootPlugin();
     virtual ~IRootPlugin();
 
-    virtual Interface::Holder open(const char *uri, Error &error) const = 0;
+    virtual Interface::Holder open(const char *uri) const = 0;
+    virtual const Error &lastError() const = 0;
 };
 
 }

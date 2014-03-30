@@ -33,9 +33,29 @@ Directory::Directory(const char *fileName, const struct stat &st) :
 Directory::~Directory()
 {}
 
+time_t Directory::cTime() const
+{
+    return m_file.cTime();
+}
+
+time_t Directory::mTime() const
+{
+    return m_file.mTime();
+}
+
+time_t Directory::aTime() const
+{
+    return m_file.aTime();
+}
+
 int Directory::permissions() const
 {
     return m_file.permissions();
+}
+
+bool Directory::setPermissions(int value)
+{
+    return m_file.setPermissions(value);
 }
 
 Directory::const_iterator Directory::begin() const
@@ -63,14 +83,19 @@ bool Directory::remove(const Interface::Holder &file)
     return m_file.remove(file);
 }
 
+const char *Directory::type() const
+{
+    return m_file.type();
+}
+
 const char *Directory::title() const
 {
     return m_file.title();
 }
 
-const char *Directory::type() const
+const char *Directory::location() const
 {
-    return m_file.type();
+    return m_file.location();
 }
 
 const Error &Directory::lastError() const

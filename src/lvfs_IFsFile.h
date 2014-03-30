@@ -17,17 +17,22 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LVFS_DEFAULT_IPERMISSIONS_H_
-#define LVFS_DEFAULT_IPERMISSIONS_H_
+#ifndef LVFS_IFSFILE_H_
+#define LVFS_IFSFILE_H_
 
+#include <time.h>
+#include <lvfs/Error>
 #include <lvfs/Interface>
 
 
 namespace LVFS {
 
-class IPermissions
+/**
+ * XXX: This is a file on your HDD/SSD.
+ */
+class IFsFile
 {
-    DECLARE_INTERFACE(LVFS::IPermissions)
+    DECLARE_INTERFACE(LVFS::IFsFile)
 
 public:
     enum
@@ -38,11 +43,18 @@ public:
     };
 
 public:
-    virtual ~IPermissions();
+    virtual ~IFsFile();
+
+    virtual time_t cTime() const = 0;
+    virtual time_t mTime() const = 0;
+    virtual time_t aTime() const = 0;
 
     virtual int permissions() const = 0;
+    virtual bool setPermissions(int value) = 0;
+
+    virtual const Error &lastError() const = 0;
 };
 
 }
 
-#endif /* LVFS_DEFAULT_IPERMISSIONS_H_ */
+#endif /* LVFS_IFSFILE_H_ */

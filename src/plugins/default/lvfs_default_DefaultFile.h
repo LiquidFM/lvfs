@@ -22,8 +22,8 @@
 
 #include <cstdio>
 #include <lvfs/IFile>
+#include <lvfs/IFsFile>
 #include <lvfs/IDirectory>
-#include <lvfs/plugins/fs/IPermissions>
 #include <lvfs/Interface>
 #include <lvfs/Error>
 
@@ -33,7 +33,7 @@ struct stat;
 
 namespace LVFS {
 
-class DefaultFile : public IPermissions, public IFile, public IDirectory, public IEntry
+class DefaultFile : public IFsFile, public IFile, public IDirectory, public IEntry
 {
 public:
     DefaultFile(const char *fileName);
@@ -42,9 +42,14 @@ public:
 
     static Interface::Holder open(const char *uri, Error &error);
 
-    /* IPermissions */
+    /* IFsFile */
+
+    virtual time_t cTime() const;
+    virtual time_t mTime() const;
+    virtual time_t aTime() const;
 
     virtual int permissions() const;
+    virtual bool setPermissions(int value);
 
     /* IFile */
 
@@ -69,8 +74,9 @@ public:
 
     /* IEntry */
 
-    virtual const char *title() const;
     virtual const char *type() const;
+    virtual const char *title() const;
+    virtual const char *location() const;
 
     /* COMMON */
 

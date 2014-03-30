@@ -17,12 +17,12 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lvfs_default_IPermissions.h"
+#include "lvfs_IFsFile.h"
 
 
 namespace LVFS {
 
-IPermissions::~IPermissions()
+IFsFile::~IFsFile()
 {}
 
 }

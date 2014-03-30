@@ -84,12 +84,7 @@ protected:
 
         virtual bool isEqual(const Holder &other) const
         {
-            return (m_entry == NULL && other.as<Imp>()->m_entry == NULL) ||
-                   (
-                           (m_entry != NULL && other.as<Imp>()->m_entry != NULL) &&
-                           strcmp(m_path, other.as<Imp>()->m_path) == 0 &&
-                           strcmp(m_entry->d_name, other.as<Imp>()->m_entry->d_name) == 0
-                   );
+            return m_entry == other.as<Imp>()->m_entry;
         }
 
         virtual reference asReference() const
@@ -306,9 +301,30 @@ Interface::Holder DefaultFile::open(const char *uri, Error &error)
     return Interface::Holder();
 }
 
+time_t DefaultFile::cTime() const
+{
+    return 0;
+}
+
+time_t DefaultFile::mTime() const
+{
+    return 0;
+}
+
+time_t DefaultFile::aTime() const
+{
+    return 0;
+}
+
 int DefaultFile::permissions() const
 {
     return m_permissions;
+}
+
+bool DefaultFile::setPermissions(int value)
+{
+    m_lastError = Error(0);
+    return false;
 }
 
 bool DefaultFile::open()
@@ -411,14 +427,19 @@ bool DefaultFile::remove(const Interface::Holder &file)
     return false;
 }
 
+const char *DefaultFile::type() const
+{
+    return "application/zip";
+}
+
 const char *DefaultFile::title() const
 {
     return m_fileName;
 }
 
-const char *DefaultFile::type() const
+const char *DefaultFile::location() const
 {
-    return "";
+    return m_filePath;
 }
 
 const Error &DefaultFile::lastError() const

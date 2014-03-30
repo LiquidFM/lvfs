@@ -25,16 +25,21 @@
 
 namespace LVFS {
 
-class File : public Implements<IPermissions, IFile, IEntry>
+class File : public Implements<IFsFile, IFile, IEntry>
 {
 public:
     File(const char *fileName);
     File(const char *fileName, const struct stat &st);
     virtual ~File();
 
-    /* IPermissions */
+    /* IFsFile */
+
+    virtual time_t cTime() const;
+    virtual time_t mTime() const;
+    virtual time_t aTime() const;
 
     virtual int permissions() const;
+    virtual bool setPermissions(int value);
 
     /* IFile */
 
@@ -51,8 +56,9 @@ public:
 
     /* IEntry */
 
-    virtual const char *title() const;
     virtual const char *type() const;
+    virtual const char *title() const;
+    virtual const char *location() const;
 
 private:
     DefaultFile m_file;

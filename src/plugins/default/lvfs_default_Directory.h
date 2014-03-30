@@ -25,16 +25,21 @@
 
 namespace LVFS {
 
-class Directory : public Implements<IPermissions, IDirectory, IEntry>
+class Directory : public Implements<IFsFile, IDirectory, IEntry>
 {
 public:
     Directory(const char *fileName);
     Directory(const char *fileName, const struct stat &st);
     virtual ~Directory();
 
-    /* IPermissions */
+    /* IFsFile */
+
+    virtual time_t cTime() const;
+    virtual time_t mTime() const;
+    virtual time_t aTime() const;
 
     virtual int permissions() const;
+    virtual bool setPermissions(int value);
 
     /* IDirectory */
 
@@ -49,8 +54,9 @@ public:
 
     /* IEntry */
 
-    virtual const char *title() const;
     virtual const char *type() const;
+    virtual const char *title() const;
+    virtual const char *location() const;
 
 private:
     DefaultFile m_file;

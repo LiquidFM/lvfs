@@ -32,8 +32,9 @@ class IEntry
 public:
     virtual ~IEntry();
 
-    virtual const char *title() const = 0;
     virtual const char *type() const = 0;
+    virtual const char *title() const = 0;
+    virtual const char *location() const = 0;
 };
 
 }

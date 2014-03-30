@@ -33,9 +33,29 @@ File::File(const char *fileName, const struct stat &st) :
 File::~File()
 {}
 
+time_t File::cTime() const
+{
+    return m_file.cTime();
+}
+
+time_t File::mTime() const
+{
+    return m_file.mTime();
+}
+
+time_t File::aTime() const
+{
+    return m_file.aTime();
+}
+
 int File::permissions() const
 {
     return m_file.permissions();
+}
+
+bool File::setPermissions(int value)
+{
+    return m_file.setPermissions(value);
 }
 
 bool File::open()
@@ -83,14 +103,19 @@ const Error &File::lastError() const
     return m_file.lastError();
 }
 
+const char *File::type() const
+{
+    return m_file.type();
+}
+
 const char *File::title() const
 {
     return m_file.title();
 }
 
-const char *File::type() const
+const char *File::location() const
 {
-    return m_file.type();
+    return m_file.location();
 }
 
 }

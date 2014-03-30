@@ -20,8 +20,18 @@
 #ifndef LVFS_PACKAGE_H_
 #define LVFS_PACKAGE_H_
 
+#include <platform/utils.h>
 #include <lvfs/plugins/IDataPlugin>
 #include <lvfs/plugins/IRootPlugin>
+
+
+#define DECLARE_PLUGIN(CLASS)                    \
+    extern "C" PLATFORM_PUBLIC_SYMBOL            \
+    const ::LVFS::Package *lvfs_plugin_package() \
+    {                                            \
+        static const CLASS package;              \
+        return &package;                         \
+    }
 
 
 namespace LVFS {
@@ -33,6 +43,8 @@ class Package
     PLATFORM_MAKE_STACK_ONLY
 
 public:
+    typedef const Package *(*PluginFunction)();
+
     struct DataPlugin
     {
         const char *type;

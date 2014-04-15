@@ -17,15 +17,26 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lvfs_IDataPlugin.h"
+#include "lvfs_default_ProtocolPlugin.h"
+#include "lvfs_default_DefaultFile.h"
 
 
 namespace LVFS {
 
-IDataPlugin::IDataPlugin()
+ProtocolPlugin::ProtocolPlugin()
 {}
 
-IDataPlugin::~IDataPlugin()
+ProtocolPlugin::~ProtocolPlugin()
 {}
+
+Interface::Holder ProtocolPlugin::open(const char *uri) const
+{
+    return DefaultFile::open(uri, m_error);
+}
+
+const Error &ProtocolPlugin::lastError() const
+{
+    return m_error;
+}
 
 }

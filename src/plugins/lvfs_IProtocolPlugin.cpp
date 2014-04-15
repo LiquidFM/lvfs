@@ -17,30 +17,15 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LVFS_IROOTPLUGIN_H_
-#define LVFS_IROOTPLUGIN_H_
-
-#include <lvfs/Error>
-#include <lvfs/Interface>
-#include <lvfs/plugins/IPlugin>
+#include "lvfs_IProtocolPlugin.h"
 
 
 namespace LVFS {
 
-class PLATFORM_MAKE_PUBLIC IRootPlugin : public IPlugin
-{
-    PLATFORM_MAKE_NONCOPYABLE(IRootPlugin)
-    PLATFORM_MAKE_NONMOVEABLE(IRootPlugin)
-    PLATFORM_MAKE_STACK_ONLY
+IProtocolPlugin::IProtocolPlugin()
+{}
 
-public:
-    IRootPlugin();
-    virtual ~IRootPlugin();
-
-    virtual Interface::Holder open(const char *uri) const = 0;
-    virtual const Error &lastError() const = 0;
-};
+IProtocolPlugin::~IProtocolPlugin()
+{}
 
 }
-
-#endif /* LVFS_IROOTPLUGIN_H_ */

@@ -17,31 +17,27 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lvfs_default_RootPlugin.h"
-#include "lvfs_default_DefaultFile.h"
+#ifndef LVFS_IPROTOCOLPLUGIN_H_
+#define LVFS_IPROTOCOLPLUGIN_H_
+
+#include <lvfs/Error>
+#include <lvfs/Interface>
 
 
 namespace LVFS {
 
-RootPlugin::RootPlugin()
-{}
-
-RootPlugin::~RootPlugin()
-{}
-
-Interface::Holder RootPlugin::open(const char *uri) const
+class PLATFORM_MAKE_PUBLIC IProtocolPlugin
 {
-    return DefaultFile::open(uri, m_error);
-}
+    DECLARE_INTERFACE(LVFS::IProtocolPlugin)
 
-const Error &RootPlugin::lastError() const
-{
-    return m_error;
-}
+public:
+    IProtocolPlugin();
+    virtual ~IProtocolPlugin();
 
-void RootPlugin::registered()
-{
-
-}
+    virtual Interface::Holder open(const char *uri) const = 0;
+    virtual const Error &lastError() const = 0;
+};
 
 }
+
+#endif /* LVFS_IPROTOCOLPLUGIN_H_ */

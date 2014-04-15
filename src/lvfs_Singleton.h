@@ -87,8 +87,8 @@ private:
 
 private:
     ::EFC::List<Plugin> m_plugins;
-    ::EFC::Map<String, ::EFC::List<const IDataPlugin *>> m_dataPlugins;
-    ::EFC::Map<String, ::EFC::List<const IRootPlugin *>> m_rootPlugins;
+    ::EFC::Map<String, ::EFC::List<const IContentPlugin *>> m_contentPlugins;
+    ::EFC::Map<String, ::EFC::List<const IProtocolPlugin *>> m_protocolPlugins;
 };
 
 }

@@ -22,20 +22,16 @@
 
 #include <lvfs/Error>
 #include <lvfs/Interface>
-#include <lvfs/plugins/IPlugin>
 
 
 namespace LVFS {
 
-class PLATFORM_MAKE_PUBLIC IDataPlugin : public IPlugin
+class PLATFORM_MAKE_PUBLIC IContentPlugin
 {
-    PLATFORM_MAKE_NONCOPYABLE(IDataPlugin)
-    PLATFORM_MAKE_NONMOVEABLE(IDataPlugin)
-    PLATFORM_MAKE_STACK_ONLY
+    DECLARE_INTERFACE(LVFS::IContentPlugin)
 
 public:
-    IDataPlugin();
-    virtual ~IDataPlugin();
+    virtual ~IContentPlugin();
 
     virtual Interface::Holder open(const Interface::Holder &file) const = 0;
     virtual const Error &lastError() const = 0;

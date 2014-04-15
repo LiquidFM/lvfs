@@ -21,8 +21,8 @@
 #define LVFS_PACKAGE_H_
 
 #include <platform/utils.h>
-#include <lvfs/plugins/IDataPlugin>
-#include <lvfs/plugins/IRootPlugin>
+#include <lvfs/plugins/IContentPlugin>
+#include <lvfs/plugins/IProtocolPlugin>
 
 
 #define DECLARE_PLUGIN(CLASS)                    \
@@ -45,16 +45,10 @@ class PLATFORM_MAKE_PUBLIC Package
 public:
     typedef const Package *(*PluginFunction)();
 
-    struct DataPlugin
+    struct Plugin
     {
         const char *type;
-        const IDataPlugin *plugin;
-    };
-
-    struct RootPlugin
-    {
-        const char *schema;
-        const IRootPlugin *plugin;
+        const Interface &plugin;
     };
 
 public:
@@ -62,8 +56,8 @@ public:
     virtual ~Package();
 
     virtual const char *name() const = 0;
-    virtual const DataPlugin **dataPlugins() const = 0;
-    virtual const RootPlugin **rootPlugins() const = 0;
+    virtual const Plugin **contentPlugins() const = 0;
+    virtual const Plugin **protocolPlugins() const = 0;
 };
 
 }

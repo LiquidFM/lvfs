@@ -18,7 +18,7 @@
  */
 
 #include "lvfs_Singleton.h"
-#include "plugins/default/lvfs_default_RootPlugin.h"
+#include "plugins/default/lvfs_default_ProtocolPlugin.h"
 
 #include <lvfs/IEntry>
 #include <brolly/assert.h>
@@ -32,7 +32,7 @@
 namespace LVFS {
 namespace {
     static Singleton *s_instance;
-    static LVFS::RootPlugin defaultPlugin;
+    static LVFS::ProtocolPlugin defaultPlugin;
 }
 WARN_UNUSED_RETURN_OFF
 
@@ -53,6 +53,7 @@ Singleton::Singleton()
     ASSERT(s_instance == NULL);
     s_instance = this;
 
+    processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-arc/liblvfs-arc.so");
 }
 
 Singleton::~Singleton()
@@ -60,8 +61,8 @@ Singleton::~Singleton()
     ASSERT(s_instance == this);
     s_instance = NULL;
 
-    m_dataPlugins.clear();
-    m_rootPlugins.clear();
+    m_contentPlugins.clear();
+    m_protocolPlugins.clear();
 
     for (auto i : m_plugins)
         dlclose(i.handle);
@@ -86,9 +87,9 @@ Interface::Holder Singleton::internalOpen(const char *uri, Error &error)
             buffer[delim - uri] = 0;
             uri = delim + sizeof(schema_delim) - 1;
 
-            auto root = m_rootPlugins.find(buffer);
+            auto root = m_protocolPlugins.find(buffer);
 
-            if (root != m_rootPlugins.end())
+            if (root != m_protocolPlugins.end())
                 for (auto i : (*root).second)
                 {
                     res = i->open(uri);
@@ -109,9 +110,9 @@ Interface::Holder Singleton::internalOpen(const char *uri, Error &error)
         Interface::Adaptor<IEntry> entry(res);
         ASSERT(entry.isValid());
 
-        auto plugin = m_dataPlugins.find(entry->type());
+        auto plugin = m_contentPlugins.find(entry->type());
 
-        if (plugin != m_dataPlugins.end())
+        if (plugin != m_contentPlugins.end())
             for (auto i : (*plugin).second)
             {
                 res2 = i->open(res);
@@ -141,13 +142,13 @@ void Singleton::processPlugin(const char *fileName)
 
             if (LIKELY(plugin.package != NULL))
             {
-                if (const Package::DataPlugin **p = plugin.package->dataPlugins())
-                    for (const Package::DataPlugin *pl = *p; pl != NULL; pl = *++p)
-                        m_dataPlugins[pl->type].push_back(pl->plugin);
+                if (const Package::Plugin **p = plugin.package->contentPlugins())
+                    for (const Package::Plugin *pl = *p; pl != NULL; pl = *++p)
+                        m_contentPlugins[pl->type].push_back(pl->plugin.as<IContentPlugin>());
 
-                if (const Package::RootPlugin **p = plugin.package->rootPlugins())
-                    for (const Package::RootPlugin *pl = *p; pl != NULL; pl = *++p)
-                        m_rootPlugins[pl->schema].push_back(pl->plugin);
+                if (const Package::Plugin **p = plugin.package->protocolPlugins())
+                    for (const Package::Plugin *pl = *p; pl != NULL; pl = *++p)
+                        m_protocolPlugins[pl->type].push_back(pl->plugin.as<IProtocolPlugin>());
 
                 m_plugins.push_back(plugin);
             }

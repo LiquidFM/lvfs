@@ -20,16 +20,14 @@
 #ifndef LVFS_IPLUGIN_H_
 #define LVFS_IPLUGIN_H_
 
-#include <platform/utils.h>
+#include <lvfs/Interface>
 
 
 namespace LVFS {
 
 class PLATFORM_MAKE_PUBLIC IPlugin
 {
-    PLATFORM_MAKE_NONCOPYABLE(IPlugin)
-    PLATFORM_MAKE_NONMOVEABLE(IPlugin)
-    PLATFORM_MAKE_STACK_ONLY
+    DECLARE_INTERFACE(LVFS::IPlugin)
 
 public:
     IPlugin();

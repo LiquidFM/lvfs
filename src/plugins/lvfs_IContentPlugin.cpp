@@ -17,33 +17,12 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LVFS_DEFAULT_ROOTPLUGIN_H_
-#define LVFS_DEFAULT_ROOTPLUGIN_H_
-
-#include <lvfs/plugins/IRootPlugin>
+#include "lvfs_IContentPlugin.h"
 
 
 namespace LVFS {
 
-class PLATFORM_MAKE_PRIVATE RootPlugin : public IRootPlugin
-{
-    PLATFORM_MAKE_NONCOPYABLE(RootPlugin)
-    PLATFORM_MAKE_NONMOVEABLE(RootPlugin)
-    PLATFORM_MAKE_STACK_ONLY
-
-public:
-    RootPlugin();
-    virtual ~RootPlugin();
-
-    virtual Interface::Holder open(const char *uri) const;
-    virtual const Error &lastError() const;
-
-    virtual void registered();
-
-private:
-    mutable Error m_error;
-};
+IContentPlugin::~IContentPlugin()
+{}
 
 }
-
-#endif /* LVFS_DEFAULT_ROOTPLUGIN_H_ */

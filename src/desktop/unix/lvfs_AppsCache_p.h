@@ -26,7 +26,6 @@
 
 #include <cstring>
 #include <cstdlib>
-#include <cstdio>
 
 #include <paths.h>
 #include <sys/statvfs.h>

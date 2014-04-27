@@ -103,11 +103,6 @@ const Error &File::lastError() const
     return m_file.lastError();
 }
 
-const char *File::type() const
-{
-    return m_file.type();
-}
-
 const char *File::title() const
 {
     return m_file.title();
@@ -116,6 +111,11 @@ const char *File::title() const
 const char *File::location() const
 {
     return m_file.location();
+}
+
+const IType *File::type() const
+{
+    return m_file.type();
 }
 
 }

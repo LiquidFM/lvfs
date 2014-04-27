@@ -21,6 +21,8 @@
 #include "lvfs_default_File.h"
 #include "lvfs_default_Directory.h"
 
+#include <lvfs/Singleton>
+
 #include <brolly/assert.h>
 #include <cstring>
 
@@ -185,7 +187,8 @@ DefaultFile::DefaultFile(const char *fileName) :
     m_size(0),
     m_lastModified(0),
     m_filePath(strdup(fileName)),
-    m_fileName(strrchr(m_filePath, '/') + 1)
+    m_fileName(strrchr(m_filePath, '/') + 1),
+    m_type(NULL)
 {
     struct stat st;
 
@@ -200,8 +203,13 @@ DefaultFile::DefaultFile(const char *fileName) :
         {
             m_permissions = translatePermissions(st);
             m_lastModified = st.st_mtime;
+
+            m_typeHolder = Singleton::desktop().typeOfDirectory();
+            ASSERT(m_typeHolder.isValid());
+            m_type = m_typeHolder->as<IType>();
         }
         else
+        {
             if (m_isLink = S_ISLNK(st.st_mode))
             {
                 char buff[PATH_MAX];
@@ -220,6 +228,11 @@ DefaultFile::DefaultFile(const char *fileName) :
                         free(realName);
                     }
             }
+
+            m_typeHolder = Singleton::desktop().typeOfFile(this, m_fileName);
+            ASSERT(m_typeHolder.isValid());
+            m_type = m_typeHolder->as<IType>();
+        }
 }
 
 DefaultFile::DefaultFile(const char *fileName, const struct stat &st) :
@@ -232,8 +245,22 @@ DefaultFile::DefaultFile(const char *fileName, const struct stat &st) :
     m_size(!m_isDir ? st.st_size : 0),
     m_lastModified(st.st_mtime),
     m_filePath(strdup(fileName)),
-    m_fileName(strrchr(m_filePath, '/') + 1)
-{}
+    m_fileName(strrchr(m_filePath, '/') + 1),
+    m_type(NULL)
+{
+    if (m_isDir)
+    {
+        m_typeHolder = Singleton::desktop().typeOfDirectory();
+        ASSERT(m_typeHolder.isValid());
+        m_type = m_typeHolder->as<IType>();
+    }
+    else
+    {
+        m_typeHolder = Singleton::desktop().typeOfFile(this, m_fileName);
+        ASSERT(m_typeHolder.isValid());
+        m_type = m_typeHolder->as<IType>();
+    }
+}
 
 DefaultFile::~DefaultFile()
 {
@@ -427,11 +454,6 @@ bool DefaultFile::remove(const Interface::Holder &file)
     return false;
 }
 
-const char *DefaultFile::type() const
-{
-    return "application/zip";
-}
-
 const char *DefaultFile::title() const
 {
     return m_fileName;
@@ -440,6 +462,11 @@ const char *DefaultFile::title() const
 const char *DefaultFile::location() const
 {
     return m_filePath;
+}
+
+const IType *DefaultFile::type() const
+{
+    return m_type;
 }
 
 const Error &DefaultFile::lastError() const

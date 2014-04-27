@@ -56,9 +56,9 @@ public:
 
     /* IEntry */
 
-    virtual const char *type() const;
     virtual const char *title() const;
     virtual const char *location() const;
+    virtual const IType *type() const;
 
 private:
     DefaultFile m_file;

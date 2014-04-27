@@ -44,7 +44,7 @@ public:
     public:
         typedef std::forward_iterator_tag iterator_category;
         typedef std::ptrdiff_t            difference_type;
-        typedef Interface::Holder        value_type;
+        typedef Interface::Holder         value_type;
         typedef const value_type *        pointer;
         typedef const value_type &        reference;
 

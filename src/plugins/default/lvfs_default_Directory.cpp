@@ -83,11 +83,6 @@ bool Directory::remove(const Interface::Holder &file)
     return m_file.remove(file);
 }
 
-const char *Directory::type() const
-{
-    return m_file.type();
-}
-
 const char *Directory::title() const
 {
     return m_file.title();
@@ -96,6 +91,11 @@ const char *Directory::title() const
 const char *Directory::location() const
 {
     return m_file.location();
+}
+
+const IType *Directory::type() const
+{
+    return m_file.type();
 }
 
 const Error &Directory::lastError() const

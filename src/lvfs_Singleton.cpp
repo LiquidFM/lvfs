@@ -68,8 +68,15 @@ Singleton::~Singleton()
         dlclose(i.handle);
 }
 
+const Desktop &Singleton::desktop()
+{
+    ASSERT(s_instance != NULL);
+    return s_instance->m_desktop;
+}
+
 Interface::Holder Singleton::open(const char *uri, Error &error)
 {
+    ASSERT(s_instance != NULL);
     return s_instance->internalOpen(uri, error);
 }
 
@@ -110,7 +117,7 @@ Interface::Holder Singleton::internalOpen(const char *uri, Error &error)
         Interface::Adaptor<IEntry> entry(res);
         ASSERT(entry.isValid());
 
-        auto plugin = m_contentPlugins.find(entry->type());
+        auto plugin = m_contentPlugins.find(entry->type()->name());
 
         if (plugin != m_contentPlugins.end())
             for (auto i : (*plugin).second)

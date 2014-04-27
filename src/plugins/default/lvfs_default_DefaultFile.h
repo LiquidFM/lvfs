@@ -21,6 +21,7 @@
 #define LVFS_DEFAULT_DEFAULTFILE_H_
 
 #include <cstdio>
+#include <lvfs/IType>
 #include <lvfs/IFile>
 #include <lvfs/IFsFile>
 #include <lvfs/IDirectory>
@@ -74,9 +75,9 @@ public:
 
     /* IEntry */
 
-    virtual const char *type() const;
     virtual const char *title() const;
     virtual const char *location() const;
+    virtual const IType *type() const;
 
     /* COMMON */
 
@@ -93,6 +94,8 @@ private:
     uint64_t m_lastModified;
     char *m_filePath;
     char *m_fileName;
+    const IType *m_type;
+    Interface::Holder m_typeHolder;
     mutable Error m_lastError;
 };
 

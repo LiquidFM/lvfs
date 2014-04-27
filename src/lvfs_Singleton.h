@@ -28,6 +28,7 @@
 #include <lvfs/Error>
 #include <lvfs/Interface>
 #include <lvfs/plugins/Package>
+#include <lvfs/Desktop>
 
 
 namespace LVFS {
@@ -51,6 +52,7 @@ public:
     Singleton();
     ~Singleton();
 
+    static const Desktop &desktop();
     static Interface::Holder open(const char *uri, Error &error);
 
 private:
@@ -89,6 +91,9 @@ private:
     ::EFC::List<Plugin> m_plugins;
     ::EFC::Map<String, ::EFC::List<const IContentPlugin *>> m_contentPlugins;
     ::EFC::Map<String, ::EFC::List<const IProtocolPlugin *>> m_protocolPlugins;
+
+private:
+    Desktop m_desktop;
 };
 
 }

@@ -33,7 +33,6 @@ public:
     virtual ~IApplication();
 
     virtual const char *name() const = 0;
-    virtual const char *genericName() const = 0;
     virtual const char *description() const = 0;
     virtual const Interface::Holder &icon() const = 0;
 

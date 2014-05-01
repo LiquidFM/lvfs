@@ -40,9 +40,8 @@ namespace {
 class App : public Implements<IApplication>
 {
 public:
-    App(const char *name, const char *genericName, const char *description, const char *exec, const Interface::Holder &icon) :
+    App(const char *name, const char *description, const char *exec, const Interface::Holder &icon) :
         m_name(name ? ::strdup(name) : NULL),
-        m_genericName(genericName ? ::strdup(genericName) : NULL),
         m_description(description ? ::strdup(description) : NULL),
         m_exec(exec ? ::strdup(exec) : NULL),
         m_icon(icon)
@@ -53,9 +52,6 @@ public:
         if (m_name)
             ::free(m_name);
 
-        if (m_genericName)
-            ::free(m_genericName);
-
         if (m_description)
             ::free(m_description);
 
@@ -64,7 +60,6 @@ public:
     }
 
     virtual const char *name() const { return m_name; }
-    virtual const char *genericName() const { return m_genericName; }
     virtual const char *description() const { return m_description; }
     virtual const Interface::Holder &icon() const { return m_icon; }
 
@@ -146,7 +141,6 @@ public:
 
 private:
     char *m_name;
-    char *m_genericName;
     char *m_description;
     char *m_exec;
     Interface::Holder m_icon;
@@ -325,7 +319,7 @@ private:
                 if (!icon.isValid())
                     icon = iconCache.findMimeIcon(XDG_MIME_TYPE_UNKNOWN, Desktop::SmallIcon, theme);
 
-                list->push_back(Interface::Holder(new (std::nothrow) App(name, gen_name, comment, exec, icon)));
+                list->push_back(Interface::Holder(new (std::nothrow) App(name, comment ? comment : gen_name, exec, icon)));
             }
         while (apps = ::xdg_joint_list_next(apps));
     }

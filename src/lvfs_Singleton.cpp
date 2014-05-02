@@ -169,6 +169,10 @@ void Singleton::processPlugin(const char *fileName)
             fprintf(stderr, "%s\n", dlerror());
         }
     }
+    else
+    {
+        fprintf(stderr, "%s\n", dlerror());
+    }
 }
 
 

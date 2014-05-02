@@ -41,7 +41,7 @@ namespace LVFS {
 class Interface;
 namespace { typedef EFC::Holder<Interface> InterfaceHolder; }
 
-class Interface : public InterfaceHolder::Data
+class PLATFORM_MAKE_PUBLIC Interface : public InterfaceHolder::Data
 {
 public:
     typedef InterfaceHolder   Holder;

@@ -29,3 +29,21 @@ build_version_file (lvfs 0.0.1)
 
 # Documentation
 add_documentation ("LVFS" 0.0.1 "Liquid Virtual File System")
+
+# Install rules
+install_header_files (lvfs "src/desktop/lvfs_Desktop.h:Desktop"
+                           "src/lvfs_Error.h:Error"
+                           "src/lvfs_IApplication.h:IApplication"
+                           "src/lvfs_IApplications.h:IApplications"
+                           "src/lvfs_IDirectory.h:IDirectory"
+                           "src/lvfs_IEntry.h:IEntry"
+                           "src/lvfs_IFile.h:IFile"
+                           "src/lvfs_IFsFile.h:IFsFile"
+                           "src/lvfs_Interface.h:Interface"
+                           "src/lvfs_IType.h:IType"
+                           "src/lvfs_Singleton.h:Singleton"
+
+                           "src/plugins/lvfs_IContentPlugin.h:plugins/IContentPlugin"
+                           "src/plugins/lvfs_IPlugin.h:plugins/IPlugin"
+                           "src/plugins/lvfs_IProtocolPlugin.h:plugins/IProtocolPlugin"
+                           "src/plugins/lvfs_Package.h:plugins/Package")

@@ -85,7 +85,8 @@ public:
         m_interface(NULL)
     {}
     explicit Adaptor(const Interface::Holder &interface) :
-        m_interface(interface->as<T>())
+        m_holder(interface),
+        m_interface(m_holder->as<T>())
     {}
 
     bool isValid() const { return m_interface != NULL; }
@@ -94,6 +95,7 @@ public:
     T *operator->() const { return m_interface; }
 
 private:
+    Holder m_holder;
     T *m_interface;
 };
 

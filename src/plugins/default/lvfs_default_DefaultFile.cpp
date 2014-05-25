@@ -21,7 +21,7 @@
 #include "lvfs_default_File.h"
 #include "lvfs_default_Directory.h"
 
-#include <lvfs/Singleton>
+#include <lvfs/Module>
 
 #include <brolly/assert.h>
 #include <cstring>
@@ -204,7 +204,7 @@ DefaultFile::DefaultFile(const char *fileName) :
             m_permissions = translatePermissions(st);
             m_lastModified = st.st_mtime;
 
-            m_typeHolder = Singleton::desktop().typeOfDirectory();
+            m_typeHolder = Module::desktop().typeOfDirectory();
             ASSERT(m_typeHolder.isValid());
             m_type = m_typeHolder->as<IType>();
         }
@@ -229,7 +229,7 @@ DefaultFile::DefaultFile(const char *fileName) :
                     }
             }
 
-            m_typeHolder = Singleton::desktop().typeOfFile(this, m_fileName);
+            m_typeHolder = Module::desktop().typeOfFile(this, m_fileName);
             ASSERT(m_typeHolder.isValid());
             m_type = m_typeHolder->as<IType>();
         }
@@ -250,13 +250,13 @@ DefaultFile::DefaultFile(const char *fileName, const struct stat &st) :
 {
     if (m_isDir)
     {
-        m_typeHolder = Singleton::desktop().typeOfDirectory();
+        m_typeHolder = Module::desktop().typeOfDirectory();
         ASSERT(m_typeHolder.isValid());
         m_type = m_typeHolder->as<IType>();
     }
     else
     {
-        m_typeHolder = Singleton::desktop().typeOfFile(this, m_fileName);
+        m_typeHolder = Module::desktop().typeOfFile(this, m_fileName);
         ASSERT(m_typeHolder.isValid());
         m_type = m_typeHolder->as<IType>();
     }

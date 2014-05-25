@@ -17,7 +17,7 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lvfs_Singleton.h"
+#include "lvfs_Module.h"
 #include "plugins/default/lvfs_default_ProtocolPlugin.h"
 
 #include <lvfs/IEntry>
@@ -31,24 +31,24 @@
 
 namespace LVFS {
 namespace {
-    static Singleton *s_instance;
+    static Module *s_instance;
     static LVFS::ProtocolPlugin defaultPlugin;
 }
 WARN_UNUSED_RETURN_OFF
 
 
-Singleton::Error::Error()
+Module::Error::Error()
 {}
 
-Singleton::Error::Error(int code) :
+Module::Error::Error(int code) :
     ::LVFS::Error(code)
 {}
 
-Singleton::Error::~Error()
+Module::Error::~Error()
 {}
 
 
-Singleton::Singleton()
+Module::Module()
 {
     ASSERT(s_instance == NULL);
     s_instance = this;
@@ -56,7 +56,7 @@ Singleton::Singleton()
     processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-arc/liblvfs-arc.so");
 }
 
-Singleton::~Singleton()
+Module::~Module()
 {
     ASSERT(s_instance == this);
     s_instance = NULL;
@@ -68,19 +68,19 @@ Singleton::~Singleton()
         dlclose(i.handle);
 }
 
-const Desktop &Singleton::desktop()
+const Desktop &Module::desktop()
 {
     ASSERT(s_instance != NULL);
     return s_instance->m_desktop;
 }
 
-Interface::Holder Singleton::open(const char *uri, Error &error)
+Interface::Holder Module::open(const char *uri, Error &error)
 {
     ASSERT(s_instance != NULL);
     return s_instance->internalOpen(uri, error);
 }
 
-Interface::Holder Singleton::internalOpen(const char *uri, Error &error)
+Interface::Holder Module::internalOpen(const char *uri, Error &error)
 {
     enum { SchemaLength = 128 };
     static const char schema_delim[] = "://";
@@ -132,7 +132,7 @@ Interface::Holder Singleton::internalOpen(const char *uri, Error &error)
     return res;
 }
 
-void Singleton::processPlugin(const char *fileName)
+void Module::processPlugin(const char *fileName)
 {
     Plugin plugin = { dlopen(fileName, RTLD_LAZY | RTLD_LOCAL), NULL };
 
@@ -176,12 +176,12 @@ void Singleton::processPlugin(const char *fileName)
 }
 
 
-bool Singleton::String::operator<(const String &other) const
+bool Module::String::operator<(const String &other) const
 {
     return strcmp(m_string, other.m_string) < 0;
 }
 
-bool Singleton::String::operator==(const String &other) const
+bool Module::String::operator==(const String &other) const
 {
     return strcmp(m_string, other.m_string) == 0;
 }

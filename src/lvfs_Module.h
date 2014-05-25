@@ -17,8 +17,8 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LVFS_SINGLETON_H_
-#define LVFS_SINGLETON_H_
+#ifndef LVFS_MODULE_H_
+#define LVFS_MODULE_H_
 
 #include <platform/utils.h>
 
@@ -33,10 +33,10 @@
 
 namespace LVFS {
 
-class PLATFORM_MAKE_PUBLIC Singleton
+class PLATFORM_MAKE_PUBLIC Module
 {
-    PLATFORM_MAKE_NONCOPYABLE(Singleton)
-    PLATFORM_MAKE_NONMOVEABLE(Singleton)
+    PLATFORM_MAKE_NONCOPYABLE(Module)
+    PLATFORM_MAKE_NONMOVEABLE(Module)
     PLATFORM_MAKE_STACK_ONLY
 
 public:
@@ -49,8 +49,8 @@ public:
     };
 
 public:
-    Singleton();
-    ~Singleton();
+    Module();
+    ~Module();
 
     static const Desktop &desktop();
     static Interface::Holder open(const char *uri, Error &error);
@@ -98,4 +98,4 @@ private:
 
 }
 
-#endif /* LVFS_SINGLETON_H_ */
+#endif /* LVFS_MODULE_H_ */

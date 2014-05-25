@@ -41,7 +41,7 @@ install_header_files (lvfs "src/desktop/lvfs_Desktop.h:Desktop"
                            "src/lvfs_IFsFile.h:IFsFile"
                            "src/lvfs_Interface.h:Interface"
                            "src/lvfs_IType.h:IType"
-                           "src/lvfs_Singleton.h:Singleton"
+                           "src/lvfs_Module.h:Module"
 
                            "src/plugins/lvfs_IContentPlugin.h:plugins/IContentPlugin"
                            "src/plugins/lvfs_IPlugin.h:plugins/IPlugin"

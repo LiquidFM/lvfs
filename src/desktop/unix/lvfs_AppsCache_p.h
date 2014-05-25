@@ -19,7 +19,7 @@
 
 #include <lvfs/IApplication>
 #include <lvfs/IApplications>
-#include <lvfs/Singleton>
+#include <lvfs/Module>
 
 #include <efc/List>
 #include <xdg/xdg.h>
@@ -284,7 +284,7 @@ private:
 
         const XdgListItem *values;
         const XdgAppGroup *group;
-        const Desktop::Locale &locale = Singleton::desktop().locale();
+        const Desktop::Locale &locale = Module::desktop().locale();
 
         do
             if (group = ::xdg_app_group_lookup(::xdg_joint_list_item_app(apps), "Desktop Entry"))

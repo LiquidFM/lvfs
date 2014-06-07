@@ -61,9 +61,11 @@ public:
 
     static const Desktop &desktop();
     static Interface::Holder open(const char *uri, Error &error);
+    static Interface::Holder open(const Interface::Holder &file);
 
 private:
     Interface::Holder internalOpen(const char *uri, Error &error);
+    Interface::Holder internalOpen(const Interface::Holder &file);
     void processPlugin(const char *fileName);
 
 private:

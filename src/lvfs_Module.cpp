@@ -83,6 +83,12 @@ Interface::Holder Module::open(const char *uri, Error &error)
     return s_instance->internalOpen(uri, error);
 }
 
+Interface::Holder Module::open(const Interface::Holder &file)
+{
+    ASSERT(s_instance != NULL);
+    return s_instance->internalOpen(file);
+}
+
 Interface::Holder Module::internalOpen(const char *uri, Error &error)
 {
     char buffer[MaxSchemaLength];
@@ -113,24 +119,29 @@ Interface::Holder Module::internalOpen(const char *uri, Error &error)
         res = defaultPlugin.open(uri);
 
     if (res.isValid())
-    {
-        Interface::Holder res2;
-        Interface::Adaptor<IEntry> entry(res);
-        ASSERT(entry.isValid());
-
-        auto plugin = m_contentPlugins.find(entry->type()->name());
-
-        if (plugin != m_contentPlugins.end())
-            for (auto i : (*plugin).second)
-            {
-                res2 = i->open(res);
-
-                if (res2.isValid())
-                    return res2;
-            }
-    }
+        return internalOpen(res);
 
     return res;
+}
+
+Interface::Holder Module::internalOpen(const Interface::Holder &file)
+{
+    Interface::Holder res;
+    Interface::Adaptor<IEntry> entry(file);
+    ASSERT(entry.isValid());
+
+    auto plugin = m_contentPlugins.find(entry->type()->name());
+
+    if (plugin != m_contentPlugins.end())
+        for (auto i : (*plugin).second)
+        {
+            res = i->open(file);
+
+            if (res.isValid())
+                return res;
+        }
+
+    return file;
 }
 
 void Module::processPlugin(const char *fileName)

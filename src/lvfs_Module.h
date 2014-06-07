@@ -40,6 +40,13 @@ class PLATFORM_MAKE_PUBLIC Module
     PLATFORM_MAKE_STACK_ONLY
 
 public:
+    enum
+    {
+        MaxSchemaLength = 128
+    };
+
+    static const char SchemaDelimiter[];
+
     class Error : public ::LVFS::Error
     {
     public:

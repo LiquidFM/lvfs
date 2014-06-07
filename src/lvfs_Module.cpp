@@ -36,6 +36,8 @@ namespace {
 }
 WARN_UNUSED_RETURN_OFF
 
+const char Module::SchemaDelimiter[] = "://";
+
 
 Module::Error::Error()
 {}
@@ -54,6 +56,7 @@ Module::Module()
     s_instance = this;
 
     processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-arc/liblvfs-arc.so");
+    processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-core/liblvfs-arc.so");
 }
 
 Module::~Module()
@@ -82,17 +85,15 @@ Interface::Holder Module::open(const char *uri, Error &error)
 
 Interface::Holder Module::internalOpen(const char *uri, Error &error)
 {
-    enum { SchemaLength = 128 };
-    static const char schema_delim[] = "://";
-    char buffer[SchemaLength];
+    char buffer[MaxSchemaLength];
     Interface::Holder res;
 
-    if (const char *delim = strstr(uri, schema_delim))
-        if (delim - uri < SchemaLength)
+    if (const char *delim = strstr(uri, SchemaDelimiter))
+        if (delim - uri < MaxSchemaLength)
         {
             memcpy(buffer, uri, delim - uri);
             buffer[delim - uri] = 0;
-            uri = delim + sizeof(schema_delim) - 1;
+            uri = delim + strlen(SchemaDelimiter);
 
             auto root = m_protocolPlugins.find(buffer);
 

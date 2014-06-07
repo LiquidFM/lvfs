@@ -459,6 +459,11 @@ const char *DefaultFile::title() const
     return m_fileName;
 }
 
+const char *DefaultFile::schema() const
+{
+    return "file";
+}
+
 const char *DefaultFile::location() const
 {
     return m_filePath;

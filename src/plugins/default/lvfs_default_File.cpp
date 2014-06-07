@@ -108,6 +108,11 @@ const char *File::title() const
     return m_file.title();
 }
 
+const char *File::schema() const
+{
+    return m_file.schema();
+}
+
 const char *File::location() const
 {
     return m_file.location();

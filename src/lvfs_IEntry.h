@@ -33,6 +33,7 @@ public:
     virtual ~IEntry();
 
     virtual const char *title() const = 0;
+    virtual const char *schema() const = 0;
     virtual const char *location() const = 0;
     virtual const IType *type() const = 0;
 };

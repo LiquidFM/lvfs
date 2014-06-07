@@ -88,6 +88,11 @@ const char *Directory::title() const
     return m_file.title();
 }
 
+const char *Directory::schema() const
+{
+    return m_file.schema();
+}
+
 const char *Directory::location() const
 {
     return m_file.location();

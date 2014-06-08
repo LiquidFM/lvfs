@@ -76,7 +76,12 @@ protected:
             strncpy(m_path, path, sizeof(m_path));
 
             if (m_dir = opendir(m_path))
+            {
+                if (strcmp(m_path, "/") == 0)
+                    m_path[0] = 0;
+
                 next();
+            }
         }
 
         virtual ~Imp()

@@ -198,6 +198,10 @@ DefaultFile::DefaultFile(const char *fileName) :
             m_size = st.st_size;
             m_permissions = translatePermissions(st);
             m_lastModified = st.st_mtime;
+
+            m_typeHolder = Module::desktop().typeOfFile(this, m_fileName);
+            ASSERT(m_typeHolder.isValid());
+            m_type = m_typeHolder->as<IType>();
         }
         else if (m_isDir = S_ISDIR(st.st_mode))
         {
@@ -210,28 +214,69 @@ DefaultFile::DefaultFile(const char *fileName) :
         }
         else
         {
-            if (m_isLink = S_ISLNK(st.st_mode))
-            {
-                char buff[PATH_MAX];
+            char buff[PATH_MAX];
+            char *realName = NULL;
 
-                if (::readlink(m_filePath, buff, PATH_MAX) == 0)
-                    if (char *realName = ::canonicalize_file_name(buff))
+            m_isLink = true;
+
+            while (m_exists && S_ISLNK(st.st_mode))
+                if (::readlink(m_filePath, buff, PATH_MAX) < 0)
+                    break;
+                else
+                {
+                    if (realName)
                     {
-                        if (m_exists = (stat(realName, &st) == 0))
-                            if ((m_isFile = S_ISREG(st.st_mode)) || (m_isDir = S_ISDIR(st.st_mode)))
-                            {
-                                m_size = st.st_size;
-                                m_permissions = translatePermissions(st);
-                                m_lastModified = st.st_mtime;
-                            }
-
                         free(realName);
+                        realName = NULL;
                     }
+
+                    if (buff[0] != '/')
+                    {
+                        memmove(buff + (m_fileName - m_filePath), buff, strlen(buff) + 1);
+                        memcpy(buff, m_filePath, m_fileName - m_filePath);
+                    }
+
+                    if (realName = ::canonicalize_file_name(buff))
+                        m_exists = (::stat(realName, &st) == 0);
+                    else
+                        break;
+                }
+
+            if (m_exists)
+                if (S_ISREG(st.st_mode))
+                {
+                    m_size = st.st_size;
+                    m_permissions = translatePermissions(st);
+                    m_lastModified = st.st_mtime;
+
+                    m_typeHolder = Module::desktop().typeOfFile(this, realName);
+                    ASSERT(m_typeHolder.isValid());
+                    m_type = m_typeHolder->as<IType>();
+                }
+                else if (S_ISDIR(st.st_mode))
+                {
+                    m_permissions = translatePermissions(st);
+                    m_lastModified = st.st_mtime;
+
+                    m_typeHolder = Module::desktop().typeOfDirectory();
+                    ASSERT(m_typeHolder.isValid());
+                    m_type = m_typeHolder->as<IType>();
+                }
+                else
+                {
+                    m_typeHolder = Module::desktop().typeOfUnknownFile();
+                    ASSERT(m_typeHolder.isValid());
+                    m_type = m_typeHolder->as<IType>();
+                }
+            else
+            {
+                m_typeHolder = Module::desktop().typeOfUnknownFile();
+                ASSERT(m_typeHolder.isValid());
+                m_type = m_typeHolder->as<IType>();
             }
 
-            m_typeHolder = Module::desktop().typeOfFile(this, m_fileName);
-            ASSERT(m_typeHolder.isValid());
-            m_type = m_typeHolder->as<IType>();
+            if (realName)
+                free(realName);
         }
 }
 

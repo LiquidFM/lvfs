@@ -56,7 +56,6 @@ Module::Module()
     s_instance = this;
 
     processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-arc/liblvfs-arc.so");
-    processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-core/liblvfs-arc.so");
 }
 
 Module::~Module()

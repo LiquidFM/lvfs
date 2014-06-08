@@ -17,9 +17,7 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../../plugins/default/lvfs_default_File.h"
-
-#include <lvfs/Interface>
+#include <lvfs/IEntry>
 
 #include <efc/Map>
 #include <efc/ScopedPointer>
@@ -32,6 +30,34 @@
 
 namespace LVFS {
 namespace {
+
+class CacheEntry : public Implements<IEntry, IType>
+{
+public:
+    CacheEntry(const char *fileName) :
+        m_filePath(strdup(fileName)),
+        m_fileName(strrchr(m_filePath, '/') + 1)
+    {}
+
+    virtual ~CacheEntry()
+    {
+        free(m_filePath);
+    }
+
+    virtual const char *title() const { return m_fileName; }
+    virtual const char *schema() const { return "file"; }
+    virtual const char *location() const { return m_filePath; }
+    virtual const IType *type() const { return this; }
+
+    virtual const char *name() const { return XDG_MIME_TYPE_UNKNOWN; }
+    virtual Interface::Holder icon() const { return Interface::Holder(); }
+    virtual const char *description() const { return XDG_MIME_TYPE_UNKNOWN; }
+
+private:
+    char *m_filePath;
+    char *m_fileName;
+};
+
 
 class Cache
 {
@@ -154,7 +180,7 @@ protected:
 
     Interface::Holder write(Index &&index, const char *fileName)
     {
-        return write(std::move(index), Interface::Holder(new (std::nothrow) File(fileName)));
+        return write(std::move(index), Interface::Holder(new (std::nothrow) CacheEntry(fileName)));
     }
 
     Interface::Holder write(Index &&index, Interface::Holder &&item)

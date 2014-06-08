@@ -75,6 +75,7 @@ public:
     Interface::Holder applications(const IType *type) const;
     Interface::Holder typeOfFile(IFile *file, const char *fileName, IconType iconType = AppIconIfNoTypeIcon) const;
     Interface::Holder typeOfDirectory() const;
+    Interface::Holder typeOfUnknownFile() const;
 
     const Error &lastError() const { return m_lastError; }
 

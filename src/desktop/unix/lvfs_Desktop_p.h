@@ -33,6 +33,7 @@ namespace LVFS { static AppsCache appsCache; }
 
 #include <lvfs/IFile>
 #include <lvfs/IType>
+#include <lvfs/Module>
 
 #include <brolly/assert.h>
 #include <efc/StateMachine>
@@ -395,7 +396,7 @@ Interface::Holder Desktop::typeOfFile(IFile *file, const char *fileName, IconTyp
 
 Interface::Holder Desktop::typeOfDirectory() const
 {
-    return Interface::Holder(new (std::nothrow) MimeType("inode/directory", "File system directory", iconCache.findMimeIcon("inode/directory", SmallIcon, theme)));
+    return Interface::Holder(new (std::nothrow) MimeType(Module::DirectoryTypeName, "File system directory", iconCache.findMimeIcon(Module::DirectoryTypeName, SmallIcon, theme)));
 }
 
 Interface::Holder Desktop::typeOfUnknownFile() const

@@ -46,6 +46,7 @@ public:
     };
 
     static const char SchemaDelimiter[];
+    static const char DirectoryTypeName[];
 
     class Error : public ::LVFS::Error
     {

@@ -37,6 +37,7 @@ namespace {
 WARN_UNUSED_RETURN_OFF
 
 const char Module::SchemaDelimiter[] = "://";
+const char Module::DirectoryTypeName[] = "inode/directory";
 
 
 Module::Error::Error()

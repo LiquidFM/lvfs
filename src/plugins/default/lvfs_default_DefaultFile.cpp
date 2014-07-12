@@ -109,26 +109,11 @@ protected:
             m_file.reset();
 
             while (readdir_r(m_dir, &m_buffer.d, &m_entry) == 0 && m_entry)
-                if (m_entry->d_type == DT_DIR || m_entry->d_type == DT_UNKNOWN)
-                {
-                    if (strcmp(m_entry->d_name, ".") == 0 || strcmp(m_entry->d_name, "..") == 0)
-                        continue;
-                    else
-                    {
-                        char path[PATH_MAX];
-
-                        if (UNLIKELY(std::snprintf(path, sizeof(path), "%s/%s", m_path, m_entry->d_name) < 0))
-                        {
-                            m_entry = NULL;
-                            break;
-                        }
-
-                        m_file.reset(new (std::nothrow) Directory(path));
-                        break;
-                    }
-                }
+                if (strcmp(m_entry->d_name, ".") == 0 || strcmp(m_entry->d_name, "..") == 0)
+                    continue;
                 else
                 {
+                    struct stat st;
                     char path[PATH_MAX];
 
                     if (UNLIKELY(std::snprintf(path, sizeof(path), "%s/%s", m_path, m_entry->d_name) < 0))
@@ -137,7 +122,14 @@ protected:
                         break;
                     }
 
-                    m_file.reset(new (std::nothrow) File(path));
+                    if (::lstat(path, &st) == 0)
+                        if (S_ISDIR(st.st_mode))
+                            m_file.reset(new (std::nothrow) Directory(path, st));
+                        else
+                            m_file.reset(new (std::nothrow) File(path, st));
+                    else
+                        m_file.reset(new (std::nothrow) File(path));
+
                     break;
                 }
         }

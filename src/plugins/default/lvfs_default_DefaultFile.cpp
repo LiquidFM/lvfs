@@ -182,7 +182,9 @@ DefaultFile::DefaultFile(const char *fileName) :
     m_exists(true),
     m_permissions(0),
     m_size(0),
-    m_lastModified(0),
+    m_cTime(0),
+    m_mTime(0),
+    m_aTime(0),
     m_filePath(strdup(fileName)),
     m_fileName(strrchr(m_filePath, '/') + 1),
     m_type(NULL)
@@ -194,7 +196,9 @@ DefaultFile::DefaultFile(const char *fileName) :
         {
             m_size = st.st_size;
             m_permissions = translatePermissions(st);
-            m_lastModified = st.st_mtime;
+            m_cTime = st.st_ctime;
+            m_mTime = st.st_mtime;
+            m_aTime = st.st_atime;
 
             m_typeHolder = Module::desktop().typeOfFile(this, m_fileName);
             ASSERT(m_typeHolder.isValid());
@@ -203,7 +207,9 @@ DefaultFile::DefaultFile(const char *fileName) :
         else if (m_isDir = S_ISDIR(st.st_mode))
         {
             m_permissions = translatePermissions(st);
-            m_lastModified = st.st_mtime;
+            m_cTime = st.st_ctime;
+            m_mTime = st.st_mtime;
+            m_aTime = st.st_atime;
 
             m_typeHolder = Module::desktop().typeOfDirectory();
             ASSERT(m_typeHolder.isValid());
@@ -244,7 +250,9 @@ DefaultFile::DefaultFile(const char *fileName) :
                 {
                     m_size = st.st_size;
                     m_permissions = translatePermissions(st);
-                    m_lastModified = st.st_mtime;
+                    m_cTime = st.st_ctime;
+                    m_mTime = st.st_mtime;
+                    m_aTime = st.st_atime;
 
                     m_typeHolder = Module::desktop().typeOfFile(this, realName);
                     ASSERT(m_typeHolder.isValid());
@@ -253,7 +261,9 @@ DefaultFile::DefaultFile(const char *fileName) :
                 else if (S_ISDIR(st.st_mode))
                 {
                     m_permissions = translatePermissions(st);
-                    m_lastModified = st.st_mtime;
+                    m_cTime = st.st_ctime;
+                    m_mTime = st.st_mtime;
+                    m_aTime = st.st_atime;
 
                     m_typeHolder = Module::desktop().typeOfDirectory();
                     ASSERT(m_typeHolder.isValid());
@@ -285,7 +295,9 @@ DefaultFile::DefaultFile(const char *fileName, const struct stat &st) :
     m_exists(true),
     m_permissions(translatePermissions(st)),
     m_size(!m_isDir ? st.st_size : 0),
-    m_lastModified(st.st_mtime),
+    m_cTime(st.st_ctime),
+    m_mTime(st.st_mtime),
+    m_aTime(st.st_atime),
     m_filePath(strdup(fileName)),
     m_fileName(strrchr(m_filePath, '/') + 1),
     m_type(NULL)
@@ -372,17 +384,17 @@ Interface::Holder DefaultFile::open(const char *uri, Error &error)
 
 time_t DefaultFile::cTime() const
 {
-    return 0;
+    return m_cTime;
 }
 
 time_t DefaultFile::mTime() const
 {
-    return 0;
+    return m_mTime;
 }
 
 time_t DefaultFile::aTime() const
 {
-    return 0;
+    return m_aTime;
 }
 
 int DefaultFile::permissions() const

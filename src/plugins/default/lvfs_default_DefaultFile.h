@@ -92,7 +92,9 @@ private:
     bool m_exists;
     int m_permissions;
     uint64_t m_size;
-    uint64_t m_lastModified;
+    time_t m_cTime;
+    time_t m_mTime;
+    time_t m_aTime;
     char *m_filePath;
     char *m_fileName;
     const IType *m_type;

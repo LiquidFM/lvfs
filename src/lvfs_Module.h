@@ -42,7 +42,8 @@ class PLATFORM_MAKE_PUBLIC Module
 public:
     enum
     {
-        MaxSchemaLength = 128
+        MaxSchemaLength = 128,
+        SchemaDelimiterLength = 3
     };
 
     static const char SchemaDelimiter[];

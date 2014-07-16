@@ -99,7 +99,7 @@ Interface::Holder Module::internalOpen(const char *uri, Error &error)
         {
             memcpy(buffer, uri, delim - uri);
             buffer[delim - uri] = 0;
-            uri = delim + strlen(SchemaDelimiter);
+            uri = delim + SchemaDelimiterLength;
 
             auto root = m_protocolPlugins.find(buffer);
 

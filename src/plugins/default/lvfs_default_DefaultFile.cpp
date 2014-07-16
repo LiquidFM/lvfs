@@ -25,12 +25,12 @@
 
 #include <brolly/assert.h>
 #include <cstring>
+#include <cstdio>
 
 #include <linux/limits.h>
 #include <sys/stat.h>
 #include <dirent.h>
 #include <unistd.h>
-#include <stdio.h>
 #include <errno.h>
 
 

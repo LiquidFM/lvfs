@@ -495,6 +495,20 @@ DefaultFile::const_iterator DefaultFile::end() const
 
 Interface::Holder DefaultFile::entry(const char *name) const
 {
+    ASSERT(name != NULL);
+
+    if (strlen(m_filePath) + strlen(name) < PATH_MAX)
+    {
+        char file[PATH_MAX];
+        Error error;
+
+        strcpy(file, m_filePath);
+        strcat(file, "/");
+        strcat(file, name);
+
+        return DefaultFile::open(file, error);
+    }
+
     return Interface::Holder();
 }
 

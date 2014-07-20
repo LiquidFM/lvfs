@@ -33,29 +33,24 @@ File::File(const char *fileName, const struct stat &st) :
 File::~File()
 {}
 
-time_t File::cTime() const
+const char *File::title() const
 {
-    return m_file.cTime();
+    return m_file.title();
 }
 
-time_t File::mTime() const
+const char *File::schema() const
 {
-    return m_file.mTime();
+    return m_file.schema();
 }
 
-time_t File::aTime() const
+const char *File::location() const
 {
-    return m_file.aTime();
+    return m_file.location();
 }
 
-int File::permissions() const
+const IType *File::type() const
 {
-    return m_file.permissions();
-}
-
-bool File::setPermissions(int value)
-{
-    return m_file.setPermissions(value);
+    return m_file.type();
 }
 
 bool File::open()
@@ -103,24 +98,29 @@ const Error &File::lastError() const
     return m_file.lastError();
 }
 
-const char *File::title() const
+time_t File::cTime() const
 {
-    return m_file.title();
+    return m_file.cTime();
 }
 
-const char *File::schema() const
+time_t File::mTime() const
 {
-    return m_file.schema();
+    return m_file.mTime();
 }
 
-const char *File::location() const
+time_t File::aTime() const
 {
-    return m_file.location();
+    return m_file.aTime();
 }
 
-const IType *File::type() const
+int File::permissions() const
 {
-    return m_file.type();
+    return m_file.permissions();
+}
+
+bool File::setPermissions(int value)
+{
+    return m_file.setPermissions(value);
 }
 
 }

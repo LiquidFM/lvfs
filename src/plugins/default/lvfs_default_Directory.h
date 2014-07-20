@@ -25,21 +25,19 @@
 
 namespace LVFS {
 
-class PLATFORM_MAKE_PRIVATE Directory : public Implements<IFsFile, IDirectory, IEntry>
+class PLATFORM_MAKE_PRIVATE Directory : public Implements<IEntry, IDirectory, IFsFile>
 {
 public:
     Directory(const char *fileName);
     Directory(const char *fileName, const struct stat &st);
     virtual ~Directory();
 
-    /* IFsFile */
+    /* IEntry */
 
-    virtual time_t cTime() const;
-    virtual time_t mTime() const;
-    virtual time_t aTime() const;
-
-    virtual int permissions() const;
-    virtual bool setPermissions(int value);
+    virtual const char *title() const;
+    virtual const char *schema() const;
+    virtual const char *location() const;
+    virtual const IType *type() const;
 
     /* IDirectory */
 
@@ -52,12 +50,14 @@ public:
 
     virtual const Error &lastError() const;
 
-    /* IEntry */
+    /* IFsFile */
 
-    virtual const char *title() const;
-    virtual const char *schema() const;
-    virtual const char *location() const;
-    virtual const IType *type() const;
+    virtual time_t cTime() const;
+    virtual time_t mTime() const;
+    virtual time_t aTime() const;
+
+    virtual int permissions() const;
+    virtual bool setPermissions(int value);
 
 private:
     DefaultFile m_file;

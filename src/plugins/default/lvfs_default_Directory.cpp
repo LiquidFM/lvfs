@@ -33,6 +33,56 @@ Directory::Directory(const char *fileName, const struct stat &st) :
 Directory::~Directory()
 {}
 
+const char *Directory::title() const
+{
+    return m_file.title();
+}
+
+const char *Directory::schema() const
+{
+    return m_file.schema();
+}
+
+const char *Directory::location() const
+{
+    return m_file.location();
+}
+
+const IType *Directory::type() const
+{
+    return m_file.type();
+}
+
+Directory::const_iterator Directory::begin() const
+{
+    return m_file.begin();
+}
+
+Directory::const_iterator Directory::end() const
+{
+    return m_file.end();
+}
+
+Interface::Holder Directory::entry(const char *name) const
+{
+    return m_file.entry(name);
+}
+
+bool Directory::rename(const Interface::Holder &file, const char *name)
+{
+    return m_file.rename(file, name);
+}
+
+bool Directory::remove(const Interface::Holder &file)
+{
+    return m_file.remove(file);
+}
+
+const Error &Directory::lastError() const
+{
+    return m_file.lastError();
+}
+
 time_t Directory::cTime() const
 {
     return m_file.cTime();
@@ -56,56 +106,6 @@ int Directory::permissions() const
 bool Directory::setPermissions(int value)
 {
     return m_file.setPermissions(value);
-}
-
-Directory::const_iterator Directory::begin() const
-{
-    return m_file.begin();
-}
-
-Directory::const_iterator Directory::end() const
-{
-    return m_file.end();
-}
-
-Interface::Holder Directory::entry(const char *name) const
-{
-    return Interface::Holder();
-}
-
-bool Directory::rename(const Interface::Holder &file, const char *name)
-{
-    return m_file.rename(file, name);
-}
-
-bool Directory::remove(const Interface::Holder &file)
-{
-    return m_file.remove(file);
-}
-
-const char *Directory::title() const
-{
-    return m_file.title();
-}
-
-const char *Directory::schema() const
-{
-    return m_file.schema();
-}
-
-const char *Directory::location() const
-{
-    return m_file.location();
-}
-
-const IType *Directory::type() const
-{
-    return m_file.type();
-}
-
-const Error &Directory::lastError() const
-{
-    return m_file.lastError();
 }
 
 }

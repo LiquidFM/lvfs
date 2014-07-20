@@ -56,6 +56,7 @@ Module::Module()
     ASSERT(s_instance == NULL);
     s_instance = this;
 
+    processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-db/liblvfs-db.so");
     processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-arc/liblvfs-arc.so");
 }
 

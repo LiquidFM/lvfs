@@ -25,21 +25,19 @@
 
 namespace LVFS {
 
-class PLATFORM_MAKE_PRIVATE File : public Implements<IFsFile, IFile, IEntry>
+class PLATFORM_MAKE_PRIVATE File : public Implements<IEntry, IFile, IFsFile>
 {
 public:
     File(const char *fileName);
     File(const char *fileName, const struct stat &st);
     virtual ~File();
 
-    /* IFsFile */
+    /* IEntry */
 
-    virtual time_t cTime() const;
-    virtual time_t mTime() const;
-    virtual time_t aTime() const;
-
-    virtual int permissions() const;
-    virtual bool setPermissions(int value);
+    virtual const char *title() const;
+    virtual const char *schema() const;
+    virtual const char *location() const;
+    virtual const IType *type() const;
 
     /* IFile */
 
@@ -54,12 +52,14 @@ public:
     virtual size_t position() const;
     virtual const Error &lastError() const;
 
-    /* IEntry */
+    /* IFsFile */
 
-    virtual const char *title() const;
-    virtual const char *schema() const;
-    virtual const char *location() const;
-    virtual const IType *type() const;
+    virtual time_t cTime() const;
+    virtual time_t mTime() const;
+    virtual time_t aTime() const;
+
+    virtual int permissions() const;
+    virtual bool setPermissions(int value);
 
 private:
     DefaultFile m_file;

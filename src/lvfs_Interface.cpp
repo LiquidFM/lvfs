@@ -25,4 +25,7 @@ namespace LVFS {
 Interface::~Interface()
 {}
 
+InterfaceExtender::~InterfaceExtender()
+{}
+
 }

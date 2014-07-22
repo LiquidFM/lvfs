@@ -50,12 +50,7 @@ public:
 public:
     inline Interface()
     {}
-    inline Interface(const Holder &parent) :
-        m_parent(parent)
-    {}
     virtual ~Interface();
-
-    const Holder &parent() const { return m_parent; }
 
     template <typename R>
     R *as() const
@@ -71,9 +66,30 @@ public:
 
 protected:
     virtual void *interface(uint32_t id) = 0;
+    inline void *interface(const Holder &original, uint32_t id) const
+    {
+        if (original.isValid())
+            return original.as<Interface>()->interface(id);
+        else
+            return NULL;
+    }
+};
+
+
+class PLATFORM_MAKE_PUBLIC InterfaceExtender : public Interface
+{
+public:
+    inline InterfaceExtender(const Holder &original) :
+        m_original(original)
+    {}
+    virtual ~InterfaceExtender();
+
+protected:
+    inline void *interfaceFromOriginal(uint32_t id)
+    { return interface(m_original, id); }
 
 private:
-    Holder m_parent;
+    Holder m_original;
 };
 
 
@@ -108,6 +124,7 @@ private:
 
 namespace detail {
     struct no_type {};
+    struct extender {};
 
     template <typename T, typename ... Arguments>
     class get_type : public virtual T, public get_type<Arguments ...>
@@ -118,8 +135,8 @@ namespace detail {
     public:
         inline get_type()
         {}
-        inline get_type(const Interface::Holder &parent) :
-            Base(parent)
+        inline get_type(const Interface::Holder &original) :
+            Base(original)
         {}
         virtual ~get_type()
         {}
@@ -140,9 +157,6 @@ namespace detail {
     public:
         inline get_type()
         {}
-        inline get_type(const Interface::Holder &parent) :
-            Interface(parent)
-        {}
         virtual ~get_type()
         {}
 
@@ -150,6 +164,23 @@ namespace detail {
         virtual void *interface(uint32_t id)
         {
             return NULL;
+        }
+    };
+
+    template <>
+    class get_type<extender> : public InterfaceExtender
+    {
+    public:
+        inline get_type(const Interface::Holder &original) :
+            InterfaceExtender(original)
+        {}
+        virtual ~get_type()
+        {}
+
+    protected:
+        virtual void *interface(uint32_t id)
+        {
+            return interfaceFromOriginal(id);
         }
     };
 }
@@ -168,6 +199,21 @@ public:
         Base(parent)
     {}
     virtual ~Implements()
+    {}
+};
+
+
+template <typename ... Arguments>
+class ExtendsBy : public detail::get_type<Arguments ..., detail::extender>
+{
+public:
+    typedef detail::get_type<Arguments ..., detail::extender> Base;
+
+public:
+    inline ExtendsBy(const Interface::Holder &original) :
+        Base(original)
+    {}
+    virtual ~ExtendsBy()
     {}
 };
 

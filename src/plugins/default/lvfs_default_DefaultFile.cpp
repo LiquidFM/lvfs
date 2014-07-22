@@ -115,6 +115,7 @@ protected:
                 {
                     struct stat st;
                     char path[PATH_MAX];
+                    Interface::Holder file;
 
                     if (UNLIKELY(std::snprintf(path, sizeof(path), "%s/%s", m_path, m_entry->d_name) < 0))
                     {
@@ -124,11 +125,16 @@ protected:
 
                     if (::lstat(path, &st) == 0)
                         if (S_ISDIR(st.st_mode))
-                            m_file.reset(new (std::nothrow) Directory(path, st));
+                            file.reset(new (std::nothrow) Directory(path, st));
                         else
-                            m_file.reset(new (std::nothrow) File(path, st));
+                            file.reset(new (std::nothrow) File(path, st));
                     else
-                        m_file.reset(new (std::nothrow) File(path));
+                        file.reset(new (std::nothrow) File(path));
+
+                    m_file = Module::open(file);
+
+                    if (!m_file.isValid())
+                        m_file = file;
 
                     break;
                 }

@@ -85,6 +85,9 @@ public:
     virtual ~InterfaceExtender();
 
 protected:
+    const Holder &original() const { return m_original; }
+
+protected:
     inline void *interfaceFromOriginal(uint32_t id)
     { return interface(m_original, id); }
 

@@ -128,9 +128,10 @@ private:
 namespace detail {
     struct no_type {};
     struct extender {};
+    struct complementor {};
 
     template <typename T, typename ... Arguments>
-    class get_type : public virtual T, public get_type<Arguments ...>
+    class get_type : public T, public get_type<Arguments ...>
     {
     public:
         typedef get_type<Arguments ...> Base;
@@ -158,8 +159,6 @@ namespace detail {
     class get_type<no_type> : public Interface
     {
     public:
-        inline get_type()
-        {}
         virtual ~get_type()
         {}
 
@@ -167,6 +166,20 @@ namespace detail {
         virtual void *interface(uint32_t id)
         {
             return NULL;
+        }
+    };
+
+    template <typename T>
+    class get_type<complementor, T> : public T
+    {
+    public:
+        virtual ~get_type()
+        {}
+
+    protected:
+        virtual void *interface(uint32_t id)
+        {
+            return T::interface(id);
         }
     };
 
@@ -196,12 +209,19 @@ public:
     typedef detail::get_type<Arguments ..., detail::no_type> Base;
 
 public:
-    inline Implements()
-    {}
-    inline Implements(const Interface::Holder &parent) :
-        Base(parent)
-    {}
     virtual ~Implements()
+    {}
+};
+
+
+template <typename T, typename ... Arguments>
+class Complements : public detail::get_type<Arguments ..., detail::complementor, T>
+{
+public:
+    typedef detail::get_type<Arguments ..., detail::complementor, T> Base;
+
+public:
+    virtual ~Complements()
     {}
 };
 

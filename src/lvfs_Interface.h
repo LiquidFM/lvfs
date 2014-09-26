@@ -137,10 +137,9 @@ namespace detail {
         typedef get_type<Arguments ...> Base;
 
     public:
-        inline get_type()
-        {}
-        inline get_type(const Interface::Holder &original) :
-            Base(original)
+        template <typename ... Arguments2>
+        inline get_type(Arguments2 ... args) :
+            Base(args...)
         {}
         virtual ~get_type()
         {}
@@ -173,6 +172,10 @@ namespace detail {
     class get_type<complementor, T> : public T
     {
     public:
+        template <typename ... Arguments>
+        inline get_type(Arguments ... args) :
+            T(args...)
+        {}
         virtual ~get_type()
         {}
 
@@ -221,6 +224,10 @@ public:
     typedef detail::get_type<Arguments ..., detail::complementor, T> Base;
 
 public:
+    template <typename ... Arguments2>
+    inline Complements(Arguments2 ... args) :
+        Base(args...)
+    {}
     virtual ~Complements()
     {}
 };

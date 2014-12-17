@@ -87,10 +87,6 @@ public:
 protected:
     const Holder &original() const { return m_original; }
 
-protected:
-    inline void *interfaceFromOriginal(uint32_t id)
-    { return interface(m_original, id); }
-
 private:
     Holder m_original;
 };
@@ -199,7 +195,7 @@ namespace detail {
     protected:
         virtual void *interface(uint32_t id)
         {
-            return interfaceFromOriginal(id);
+            return Interface::interface(original(), id);
         }
     };
 }

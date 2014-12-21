@@ -49,13 +49,7 @@ public:
     static const char SchemaDelimiter[];
     static const char DirectoryTypeName[];
 
-    class Error : public ::LVFS::Error
-    {
-    public:
-        Error();
-        Error(int code);
-        virtual ~Error();
-    };
+    typedef ::LVFS::Error Error;
 
 public:
     Module();

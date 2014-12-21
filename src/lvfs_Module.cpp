@@ -40,22 +40,12 @@ const char Module::SchemaDelimiter[] = "://";
 const char Module::DirectoryTypeName[] = "inode/directory";
 
 
-Module::Error::Error()
-{}
-
-Module::Error::Error(int code) :
-    ::LVFS::Error(code)
-{}
-
-Module::Error::~Error()
-{}
-
-
 Module::Module()
 {
     ASSERT(s_instance == NULL);
     s_instance = this;
 
+    m_protocolPlugins["file"].push_back(defaultPlugin.as<IProtocolPlugin>());
     processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-db/liblvfs-db.so");
     processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-arc/liblvfs-arc.so");
 }
@@ -104,7 +94,9 @@ Interface::Holder Module::internalOpen(const char *uri, Error &error)
 
             auto root = m_protocolPlugins.find(buffer);
 
-            if (root != m_protocolPlugins.end())
+            if (root == m_protocolPlugins.end())
+                return res;
+            else
                 for (auto i : (*root).second)
                 {
                     res = i->open(uri);

@@ -21,7 +21,7 @@ list (APPEND ${PROJECT_NAME}_LIBS ${CMAKE_THREAD_LIBS_INIT})
 add_subdirectory (src)
 
 # Target - lvfs
-add_library(lvfs SHARED ${${PROJECT_NAME}_SOURCES})
+add_library (lvfs SHARED ${${PROJECT_NAME}_SOURCES})
 target_link_libraries (lvfs ${${PROJECT_NAME}_LIBS})
 
 # Version

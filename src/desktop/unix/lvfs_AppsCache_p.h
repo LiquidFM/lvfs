@@ -1,7 +1,7 @@
 /**
  * This file is part of lvfs.
  *
- * Copyright (C) 2011-2014 Dmitriy Vilkov, <dav.daemon@gmail.com>
+ * Copyright (C) 2011-2015 Dmitriy Vilkov, <dav.daemon@gmail.com>
  *
  * lvfs is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include <lvfs/Module>
 
 #include <efc/List>
+#include <efc/Vector>
 #include <xdg/xdg.h>
 
 #include <cstring>
@@ -63,81 +64,132 @@ public:
     virtual const char *description() const { return m_description; }
     virtual const Interface::Holder &icon() const { return m_icon; }
 
-    virtual bool exec() const
+    virtual bool open(const IEntry *entry) const
     {
-        return false;
-    }
+        char buffer[PATH_MAX];
 
-//    virtual bool exec(const IFileContainer *container, const IFileInfo *file, char *error) const
-//    {
-//        typedef QList<QByteArray> List;
-//        QByteArray workingDirectory = container->location();
-//        QByteArray fileName(file->fileName());
-//
-//        List arguments = QByteArray(m_exec).
-//                replace("%d", QByteArray()).
-//                replace("%D", QByteArray()).
-//                replace("%n", QByteArray()).
-//                replace("%N", QByteArray()).
-//                replace("%k", QByteArray()).
-//                replace("%v", QByteArray()).
-//                replace("%m", QByteArray()).
-//                trimmed().
-//                split(' ');
-//
-//        for (List::size_type i = 0, size = arguments.size(); i < size;)
-//            if (arguments.at(i).indexOf('=') != -1)
-//            {
-//                arguments.removeAt(i);
-//                --size;
-//            }
-//            else
-//            {
-//                arguments[i] = arguments.at(i).trimmed();
-//
-//                if (arguments.at(i).indexOf("%i") != -1)
-//                {
-//                    arguments[i].replace("%i", m_iconName);
-//                    arguments.insert(i, QByteArray("--icon"));
-//                    ++i;
-//                    ++size;
-//                }
-//                else
-//                    arguments[i].
-//                        replace("%f", fileName).
-//                        replace("%F", fileName).
-//                        replace("%u", fileName).
-//                        replace("%U", fileName).
-//                        replace("%c", ::Desktop::Locale::current()->codec()->fromUnicode(m_name));
-//
-//                ++i;
-//            }
-//
-//        if (pid_t pid = fork())
-//        {
-//            if (pid < 0)
-//            {
+        if (::strlen(m_exec) > sizeof(buffer) - 1)
+            return false;
+
+        ::strcpy(buffer, m_exec);
+
+        for (char *pos = buffer, *pos2 = NULL;
+             (pos2 = strstr(pos, "%d")) ||
+             (pos2 = strstr(pos, "%D")) ||
+             (pos2 = strstr(pos, "%n")) ||
+             (pos2 = strstr(pos, "%N")) ||
+             (pos2 = strstr(pos, "%k")) ||
+             (pos2 = strstr(pos, "%v")) ||
+             (pos2 = strstr(pos, "%m"));
+             pos = pos2)
+        {
+            ::memmove(pos2, pos2 + 2, ::strlen(pos2 + 2) + 1);
+        }
+
+        char *pos;
+        EFC::List<char *> args;
+
+        for (char *pos2 = pos = buffer; pos2 = ::strchr(pos, ' '); pos = pos2 + 1)
+        {
+            *pos2 = 0;
+
+            if ((pos2 - pos) > 1 && ::strchr(pos, '=') == NULL && ::strstr(pos, "env") == NULL)
+                args.push_back(pos);
+        }
+
+        args.push_back(pos);
+
+        EFC::Vector<char *> args2;
+        args2.reserve(args.size() + 1);
+
+        for (auto i : args)
+            if (::strstr(i, "%i"))
+            {
+                static const char icon[] = "--icon";
+                size_t len = sizeof(icon) + 1 + ::strlen(m_icon->as<IEntry>()->location());
+
+                pos = static_cast<char *>(::malloc(len));
+
+                if (UNLIKELY(pos == NULL))
+                {
+                    for (auto i : args2)
+                        ::free(i);
+
+                    return false;
+                }
+
+                ::snprintf(pos, len, "%s %s", icon, m_icon->as<IEntry>()->location());
+
+                args2.push_back(pos);
+            }
+            else if (::strstr(i, "%f") ||
+                     ::strstr(i, "%F") ||
+                     ::strstr(i, "%u") ||
+                     ::strstr(i, "%U"))
+            {
+                size_t len = ::strlen(entry->location()) + 1;
+
+                pos = static_cast<char *>(::malloc(len));
+
+                if (UNLIKELY(pos == NULL))
+                {
+                    for (auto i : args2)
+                        ::free(i);
+
+                    return false;
+                }
+
+                ::strcpy(pos, entry->location());
+
+                args2.push_back(pos);
+            }
+            else if (::strstr(i, "%c"))
+            {
+                size_t len = ::strlen(m_name) + 1;
+
+                pos = static_cast<char *>(::malloc(len));
+
+                if (UNLIKELY(pos == NULL))
+                {
+                    for (auto i : args2)
+                        ::free(i);
+
+                    return false;
+                }
+
+                ::strcpy(pos, m_name);
+
+                args2.push_back(pos);
+            }
+            else
+                args2.push_back(::strdup(i));
+
+        if (pid_t pid = ::fork())
+        {
+            for (auto i : args2)
+                ::free(i);
+
+            if (pid < 0)
+            {
 //                error = Info::codec()->toUnicode(::strerror(errno));
-//                return false;
-//            }
-//        }
-//        else
-//        {
-//            QVarLengthArray<char *, 8> argv(arguments.size() + 1);
-//
-//            for (List::size_type i = 0, size = arguments.size(); i < size; ++i)
-//                argv.data()[i] = arguments[i].data();
-//
-//            argv.data()[arguments.size()] = NULL;
-//
-//            setsid();
-//            chdir(workingDirectory);
-//            execvp(argv.data()[0], argv.data());
-//            exit(EXIT_FAILURE);
-//        }
-//
-//        return true;
-//    }
+                return false;
+            }
+        }
+        else
+        {
+            args2.push_back(NULL);
+
+            ::strcpy(buffer, entry->location());
+            *::strrchr(buffer, '/') = 0;
+
+            ::setsid();
+            ::chdir(buffer);
+            ::execvp(args2[0], args2.data());
+            ::exit(EXIT_FAILURE);
+        }
+
+        return true;
+    }
 
 private:
     char *m_name;

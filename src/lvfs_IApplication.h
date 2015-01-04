@@ -1,7 +1,7 @@
 /**
  * This file is part of lvfs.
  *
- * Copyright (C) 2011-2014 Dmitriy Vilkov, <dav.daemon@gmail.com>
+ * Copyright (C) 2013-2015 Dmitriy Vilkov, <dav.daemon@gmail.com>
  *
  * lvfs is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #ifndef LVFS_IAPPLICATION_H_
 #define LVFS_IAPPLICATION_H_
 
-#include <lvfs/Interface>
+#include <lvfs/IEntry>
 
 
 namespace LVFS {
@@ -36,7 +36,7 @@ public:
     virtual const char *description() const = 0;
     virtual const Interface::Holder &icon() const = 0;
 
-    virtual bool exec() const = 0;
+    virtual bool open(const IEntry *entry) const = 0;
 };
 
 }

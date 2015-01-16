@@ -20,6 +20,7 @@
 #ifndef LVFS_IFILE_H_
 #define LVFS_IFILE_H_
 
+#include <cstdio>
 #include <cstddef>
 #include <cstdint>
 #include <lvfs/Interface>
@@ -44,12 +45,29 @@ public:
         FromEnd
     };
 
+    enum Advise
+    {
+        /** The application has no specific advice to give on this range of the file. It should be treated as normal. */
+        Normal,
+        /** The application intends to access the data in the specified range in a random (nonsequential) order. */
+        Random,
+        /** The application intends to access the data in the specified range sequentially, from lower to higher addresses. */
+        Sequential,
+        /** The application intends to access the data in the specified range in the near future. */
+        WillNeed,
+        /** The application intends to access the data in the specified range in the near future, but only once. */
+        NoReuse,
+        /** The application does not intend to access the pages in the specified range in the near future. */
+        DontNeed
+    };
+
 public:
     virtual ~IFile();
 
     virtual bool open() = 0;
     virtual size_t read(void *buffer, size_t size) = 0;
     virtual size_t write(const void *buffer, size_t size) = 0;
+    virtual bool advise(off_t offset, off_t len, Advise advise) = 0;
     virtual bool seek(long offset, Whence whence = FromCurrent) = 0;
     virtual bool flush() = 0;
     virtual void close() = 0;

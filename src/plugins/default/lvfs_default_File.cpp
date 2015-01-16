@@ -68,6 +68,11 @@ size_t File::write(const void *buffer, size_t size)
     return m_file.write(buffer, size);
 }
 
+bool File::advise(off_t offset, off_t len, Advise advise)
+{
+    return m_file.advise(offset, len, advise);
+}
+
 bool File::seek(long offset, Whence whence)
 {
     return m_file.seek(offset, whence);

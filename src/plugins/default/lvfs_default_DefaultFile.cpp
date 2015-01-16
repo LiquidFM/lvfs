@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <errno.h>
 
 
@@ -443,6 +444,19 @@ size_t DefaultFile::write(const void *buffer, size_t size)
     size_t res = fwrite(buffer, 1, size, m_file);
     m_lastError = errno;
     return res;
+}
+
+bool DefaultFile::advise(off_t offset, off_t len, Advise advise)
+{
+    ASSERT(m_file != NULL);
+    static const int posix_advice[] = { POSIX_FADV_NORMAL,
+                                        POSIX_FADV_RANDOM,
+                                        POSIX_FADV_SEQUENTIAL,
+                                        POSIX_FADV_WILLNEED,
+                                        POSIX_FADV_NOREUSE,
+                                        POSIX_FADV_DONTNEED };
+
+    return posix_fadvise(m_file->_fileno, offset, len, posix_advice[advise]) == 0;
 }
 
 bool DefaultFile::seek(long offset, Whence whence)

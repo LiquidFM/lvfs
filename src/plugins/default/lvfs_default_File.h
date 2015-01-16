@@ -44,6 +44,7 @@ public:
     virtual bool open();
     virtual size_t read(void *buffer, size_t size);
     virtual size_t write(const void *buffer, size_t size);
+    virtual bool advise(off_t offset, off_t len, Advise advise);
     virtual bool seek(long offset, Whence whence);
     virtual bool flush();
     virtual void close();

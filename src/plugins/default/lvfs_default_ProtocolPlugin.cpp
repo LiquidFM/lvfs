@@ -18,7 +18,7 @@
  */
 
 #include "lvfs_default_ProtocolPlugin.h"
-#include "lvfs_default_DefaultFile.h"
+#include "lvfs_default_Entry.h"
 
 
 namespace LVFS {
@@ -31,7 +31,7 @@ ProtocolPlugin::~ProtocolPlugin()
 
 Interface::Holder ProtocolPlugin::open(const char *uri) const
 {
-    return DefaultFile::open(uri, m_error);
+    return Entry::open(uri, m_error);
 }
 
 const Error &ProtocolPlugin::lastError() const

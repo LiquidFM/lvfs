@@ -30,14 +30,21 @@
 namespace LVFS {
 
 /**
- * XXX: This is not a file on your HDD/SSD.
- * It's just a readable/writeable entry.
+ * XXX: This is a minimal interface
+ * to read/write data from/to IEntry
  */
 class PLATFORM_MAKE_PUBLIC IFile
 {
     DECLARE_INTERFACE(LVFS::IFile)
 
 public:
+    enum Mode
+    {
+        Read,
+        Write,
+        ReadWrite
+    };
+
     enum Whence
     {
         FromBeginning,
@@ -64,16 +71,12 @@ public:
 public:
     virtual ~IFile();
 
-    virtual bool open() = 0;
     virtual size_t read(void *buffer, size_t size) = 0;
     virtual size_t write(const void *buffer, size_t size) = 0;
-    virtual bool advise(off_t offset, off_t len, Advise advise) = 0;
-    virtual bool seek(long offset, Whence whence = FromCurrent) = 0;
+    virtual bool advise(off64_t offset, off64_t len, Advise advise) = 0;
+    virtual bool seek(off64_t offset, Whence whence = FromCurrent) = 0;
     virtual bool flush() = 0;
-    virtual void close() = 0;
 
-    virtual uint64_t size() const = 0;
-    virtual size_t position() const = 0;
     virtual const Error &lastError() const = 0;
 };
 

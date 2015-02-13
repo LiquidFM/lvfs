@@ -17,10 +17,10 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LVFS_DEFAULT_FILE_H_
-#define LVFS_DEFAULT_FILE_H_
+#ifndef LVFS_DEFAULT_ENTRY_H_
+#define LVFS_DEFAULT_ENTRY_H_
 
-#include <lvfs/IFile>
+#include <lvfs/IEntry>
 #include <lvfs/IProperties>
 
 
@@ -29,23 +29,19 @@ struct stat;
 
 namespace LVFS {
 
-class PLATFORM_MAKE_PRIVATE File : public Implements<IFile, IProperties>
+class PLATFORM_MAKE_PRIVATE Entry : public Implements<IEntry, IProperties>
 {
 public:
-    File(const char *fileName, Mode mode);
-    virtual ~File();
+    Entry(const char *fileName, const struct stat &st);
+    virtual ~Entry();
 
-    bool isValid() const;
+    /* IEntry */
 
-    /* IFile */
-
-    virtual size_t read(void *buffer, size_t size);
-    virtual size_t write(const void *buffer, size_t size);
-    virtual bool advise(off64_t offset, off64_t len, Advise advise);
-    virtual bool seek(off64_t offset, Whence whence = FromCurrent);
-    virtual bool flush();
-
-    virtual const Error &lastError() const;
+    virtual const char *title() const;
+    virtual const char *schema() const;
+    virtual const char *location() const;
+    virtual const IType *type() const;
+    virtual Interface::Holder open(IFile::Mode mode) const;
 
     /* IProperties */
 
@@ -55,18 +51,21 @@ public:
     virtual time_t aTime() const;
     virtual int permissions() const;
 
-    static int translatePermissions(const struct stat &st);
+    static Interface::Holder open(const char *uri, Error &error);
 
 private:
-    int m_file;
+    char *m_filePath;
+    const char *m_fileName;
+    Interface::Adaptor<IType> m_type;
+
+private:
     off64_t m_size;
     time_t m_cTime;
     time_t m_mTime;
     time_t m_aTime;
     int m_permissions;
-    Error m_lastError;
 };
 
 }
 
-#endif /* LVFS_DEFAULT_FILE_H_ */
+#endif /* LVFS_DEFAULT_ENTRY_H_ */

@@ -17,44 +17,12 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LVFS_IFSFILE_H_
-#define LVFS_IFSFILE_H_
-
-#include <time.h>
-#include <lvfs/Error>
-#include <lvfs/Interface>
+#include "lvfs_IProperties.h"
 
 
 namespace LVFS {
 
-/**
- * XXX: This is a file on your HDD/SSD.
- */
-class PLATFORM_MAKE_PUBLIC IFsFile
-{
-    DECLARE_INTERFACE(LVFS::IFsFile)
-
-public:
-    enum
-    {
-        Read  = 0x1,
-        Write = 0x1 << 1,
-        Exec  = 0x1 << 2
-    };
-
-public:
-    virtual ~IFsFile();
-
-    virtual time_t cTime() const = 0;
-    virtual time_t mTime() const = 0;
-    virtual time_t aTime() const = 0;
-
-    virtual int permissions() const = 0;
-    virtual bool setPermissions(int value) = 0;
-
-    virtual const Error &lastError() const = 0;
-};
+IProperties::~IProperties()
+{}
 
 }
-
-#endif /* LVFS_IFSFILE_H_ */

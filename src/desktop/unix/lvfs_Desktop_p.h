@@ -31,8 +31,7 @@ namespace LVFS { static AppsCache appsCache; }
 
 #include "../lvfs_MimeType.h"
 
-#include <lvfs/IFile>
-#include <lvfs/IType>
+#include <lvfs/IEntry>
 #include <lvfs/Module>
 
 #include <brolly/assert.h>
@@ -307,20 +306,28 @@ Interface::Holder Desktop::applications(const IType *type) const
     return appsCache.findApplications(type);
 }
 
-Interface::Holder Desktop::typeOfFile(IFile *file, const char *fileName, IconType iconType) const
+Interface::Holder Desktop::typeOfFile(const IEntry *entry, IconType iconType) const
 {
-    ASSERT(file != NULL && fileName != NULL);
-    const char *mimeType = xdg_mime_get_mime_type_from_file_name(fileName);
+    ASSERT(entry != NULL);
+    const char *mimeType = xdg_mime_get_mime_type_from_file_name(entry->title());
 
-    if (mimeType == XDG_MIME_TYPE_UNKNOWN && file->open())
+    if (mimeType == XDG_MIME_TYPE_UNKNOWN)
     {
-        int len = xdg_mime_get_max_buffer_extents();
-        ::EFC::ScopedPointer<char> buffer(new (std::nothrow) char [len]);
+        Interface::Holder file(entry->open(IFile::Read));
 
-        if (LIKELY(buffer != NULL))
-            mimeType = xdg_mime_get_mime_type_for_data(buffer.get(), len, NULL);
+        if (file.isValid())
+        {
+            ssize_t len = xdg_mime_get_max_buffer_extents();
+            ::EFC::ScopedPointer<char> buffer(new (std::nothrow) char [len]);
 
-        file->close();
+            if (LIKELY(buffer != NULL))
+            {
+                len = file->as<IFile>()->read(buffer.get(), len);
+
+                if (len > 0)
+                    mimeType = xdg_mime_get_mime_type_for_data(buffer.get(), len, NULL);
+            }
+        }
     }
 
     if (strcmp(mimeType, XDG_MIME_TYPE_UNKNOWN) == 0 ||

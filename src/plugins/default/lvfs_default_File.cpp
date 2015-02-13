@@ -1,7 +1,7 @@
 /**
  * This file is part of lvfs.
  *
- * Copyright (C) 2011-2014 Dmitriy Vilkov, <dav.daemon@gmail.com>
+ * Copyright (C) 2011-2015 Dmitriy Vilkov, <dav.daemon@gmail.com>
  *
  * lvfs is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,115 +17,155 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define _FILE_OFFSET_BITS 64
+
 #include "lvfs_default_File.h"
+
+#include <brolly/assert.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 
 namespace LVFS {
 
-File::File(const char *fileName) :
-    m_file(fileName)
-{}
+static uid_t userId = getuid();
+static gid_t groupId = getgid();
 
-File::File(const char *fileName, const struct stat &st) :
-    m_file(fileName, st)
-{}
+
+File::File(const char *fileName, Mode mode) :
+    m_file(::open(fileName, 0)),
+    m_size(0),
+    m_cTime(0),
+    m_mTime(0),
+    m_aTime(0),
+    m_permissions(0)
+{
+    if (isValid())
+    {
+        struct stat st;
+
+        if (LIKELY(::fstat(m_file, &st) != -1))
+        {
+            m_size = st.st_size;
+            m_cTime = st.st_ctime;
+            m_mTime = st.st_mtime;
+            m_aTime = st.st_atime;
+            m_permissions = translatePermissions(st);
+        }
+    }
+}
 
 File::~File()
-{}
-
-const char *File::title() const
 {
-    return m_file.title();
+    if (isValid())
+        ::close(m_file);
 }
 
-const char *File::schema() const
+bool File::isValid() const
 {
-    return m_file.schema();
-}
-
-const char *File::location() const
-{
-    return m_file.location();
-}
-
-const IType *File::type() const
-{
-    return m_file.type();
-}
-
-bool File::open()
-{
-    return m_file.open();
+    return m_file != -1;
 }
 
 size_t File::read(void *buffer, size_t size)
 {
-    return m_file.read(buffer, size);
+    ASSERT(isValid());
+    return ::read(m_file, buffer, size);
 }
 
 size_t File::write(const void *buffer, size_t size)
 {
-    return m_file.write(buffer, size);
+    ASSERT(isValid());
+    return ::write(m_file, buffer, size);
 }
 
-bool File::advise(off_t offset, off_t len, Advise advise)
+bool File::advise(off64_t offset, off64_t len, Advise advise)
 {
-    return m_file.advise(offset, len, advise);
+    ASSERT(isValid());
+    static const int posix_advice[] = { POSIX_FADV_NORMAL,
+                                        POSIX_FADV_RANDOM,
+                                        POSIX_FADV_SEQUENTIAL,
+                                        POSIX_FADV_WILLNEED,
+                                        POSIX_FADV_NOREUSE,
+                                        POSIX_FADV_DONTNEED };
+
+    return ::posix_fadvise64(m_file, offset, len, posix_advice[advise]) == 0;
 }
 
-bool File::seek(long offset, Whence whence)
+bool File::seek(off64_t offset, Whence whence)
 {
-    return m_file.seek(offset, whence);
+    ASSERT(isValid());
+    static const int system[FromEnd + 1] = { SEEK_SET, SEEK_CUR, SEEK_END };
+
+    return ::lseek64(m_file, offset, system[whence]) != (off64_t)-1;
 }
 
 bool File::flush()
 {
-    return m_file.flush();
-}
-
-void File::close()
-{
-    m_file.close();
-}
-
-uint64_t File::size() const
-{
-    return m_file.size();
-}
-
-size_t File::position() const
-{
-    return m_file.position();
+    ASSERT(isValid());
+#if _GNU_SOURCE
+    ::syncfs(m_file);
+#endif
+    return true;
 }
 
 const Error &File::lastError() const
 {
-    return m_file.lastError();
+    return m_lastError;
+}
+
+off64_t File::size() const
+{
+    ASSERT(isValid());
+    return m_size;
 }
 
 time_t File::cTime() const
 {
-    return m_file.cTime();
+    ASSERT(isValid());
+    return m_cTime;
 }
 
 time_t File::mTime() const
 {
-    return m_file.mTime();
+    ASSERT(isValid());
+    return m_mTime;
 }
 
 time_t File::aTime() const
 {
-    return m_file.aTime();
+    ASSERT(isValid());
+    return m_aTime;
 }
 
 int File::permissions() const
 {
-    return m_file.permissions();
+    ASSERT(isValid());
+    return m_permissions;
 }
 
-bool File::setPermissions(int value)
+int File::translatePermissions(const struct stat &st)
 {
-    return m_file.setPermissions(value);
+    int res = 0;
+
+    if ((st.st_mode & S_IROTH) ||
+        (st.st_uid == userId && (st.st_mode & S_IRUSR)) ||
+        (st.st_gid == groupId && (st.st_mode & S_IRGRP)))
+        res |= IProperties::Read;
+
+    if ((st.st_mode & S_IWOTH) ||
+        (st.st_uid == userId  && (st.st_mode & S_IWUSR)) ||
+        (st.st_gid == groupId && (st.st_mode & S_IWGRP)))
+        res |= IProperties::Write;
+
+    if ((st.st_mode & S_IXOTH) ||
+        (st.st_uid == userId  && (st.st_mode & S_IXUSR)) ||
+        (st.st_gid == groupId && (st.st_mode & S_IXGRP)))
+        res |= IProperties::Exec;
+
+    return res;
 }
 
 }

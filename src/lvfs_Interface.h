@@ -102,18 +102,42 @@ public:
     template <typename O>
     inline Adaptor(const Adaptor<O> &other) :
         m_holder(other.m_holder),
-        m_interface(m_holder->as<T>())
-    {}
+        m_interface(NULL)
+    {
+        if (m_holder.isValid())
+            m_interface = m_holder->as<T>();
+    }
     inline explicit Adaptor(const Interface::Holder &interface) :
         m_holder(interface),
-        m_interface(m_holder->as<T>())
-    {}
+        m_interface(NULL)
+    {
+        if (m_holder.isValid())
+            m_interface = m_holder->as<T>();
+    }
 
     inline bool isValid() const { return m_interface != NULL; }
-    const Holder &interface() const { return m_holder; }
+    inline const Holder &interface() const { return m_holder; }
+    inline void reset() { m_holder.reset(); m_interface = NULL; }
+
+    inline Interface::Adaptor<T> &operator=(const Interface::Holder &interface)
+    {
+        m_holder = interface;
+
+        if (m_holder.isValid())
+            m_interface = m_holder->as<T>();
+        else
+            m_interface = NULL;
+
+        return *this;
+    }
+
+    template <typename O>
+    inline Interface::Adaptor<T> &operator=(const Adaptor<O> &other)
+    { return operator=(other.m_holder); }
 
     inline T &operator*() const { return *m_interface; }
     inline T *operator->() const { return m_interface; }
+    inline operator T *() const { return m_interface; }
 
 private:
     Holder m_holder;

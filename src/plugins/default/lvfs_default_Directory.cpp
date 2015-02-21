@@ -214,28 +214,28 @@ Interface::Holder Directory::entry(const char *name, const IType *type, bool cre
     return Interface::Holder();
 }
 
-Interface::Holder Directory::copy(const Progress &callback, const Interface::Holder &file, bool move)
+bool Directory::copy(const Progress &callback, const Interface::Holder &file, bool move)
 {
     ASSERT(file.isValid());
 
     if (::strcmp(file->as<IEntry>()->type()->name(), Module::DirectoryTypeName) == 0)
-        return Interface::Holder();
+        return false;
 
     char path[PATH_MAX];
 
     if (UNLIKELY(std::snprintf(path, sizeof(path), "%s/%s", m_filePath, file->as<IEntry>()->title()) < 0))
-        return Interface::Holder();
+        return false;
 
     if (move)
     {
         if (::link(file->as<IEntry>()->location(), path) == 0 && ::unlink(file->as<IEntry>()->location()) == 0)
-            return Entry::open(path, m_lastError);
+            return true;
         else
             if (errno == EEXIST &&
                 ::unlink(path) == 0 &&
                 ::link(file->as<IEntry>()->location(), path) == 0 &&
                 ::unlink(file->as<IEntry>()->location()) == 0)
-                return Entry::open(path, m_lastError);
+                return true;
 
         m_lastError = errno;
     }
@@ -244,7 +244,7 @@ Interface::Holder Directory::copy(const Progress &callback, const Interface::Hol
     char *buffer = new (std::nothrow) char [BufferSize];
 
     if (UNLIKELY(buffer == NULL))
-        return Interface::Holder();
+        return false;
 
     int dest_file = ::creat(path, S_IRUSR | S_IWUSR);
 
@@ -252,7 +252,7 @@ Interface::Holder Directory::copy(const Progress &callback, const Interface::Hol
     {
         m_lastError = errno;
         delete [] buffer;
-        return Interface::Holder();
+        return false;
     }
 
     Interface::Adaptor<IFile> src_file(file->as<IEntry>()->open());
@@ -263,7 +263,7 @@ Interface::Holder Directory::copy(const Progress &callback, const Interface::Hol
         ::unlink(path);
         m_lastError = EIO;
         delete [] buffer;
-        return Interface::Holder();
+        return false;
     }
 
     off64_t read;
@@ -277,13 +277,13 @@ Interface::Holder Directory::copy(const Progress &callback, const Interface::Hol
             ::unlink(path);
             m_lastError = EIO;
             delete [] buffer;
-            return Interface::Holder();
+            return false;
         }
 
     ::close(dest_file);
     delete [] buffer;
 
-    return Entry::open(path, m_lastError);
+    return true;
 }
 
 bool Directory::rename(const Interface::Holder &file, const char *name)

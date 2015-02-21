@@ -50,9 +50,9 @@ public:
     virtual const_iterator end() const;
 
     virtual bool exists(const char *name) const;
-    virtual Interface::Holder entry(const char *name, const IType *type, bool create = false);
-    virtual Interface::Holder copy(const Progress &callback, const Interface::Holder &file, bool move = false);
+    virtual Interface::Holder entry(const char *name, const IType *type = NULL, bool create = false);
 
+    virtual bool copy(const Progress &callback, const Interface::Holder &file, bool move = false);
     virtual bool rename(const Interface::Holder &file, const char *name);
     virtual bool remove(const Interface::Holder &file);
 

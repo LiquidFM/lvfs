@@ -98,9 +98,9 @@ public:
     virtual const_iterator end() const = 0;
 
     virtual bool exists(const char *name) const = 0;
-    virtual Interface::Holder entry(const char *name, const IType *type, bool create = false) = 0;
-    virtual Interface::Holder copy(const Progress &callback, const Interface::Holder &file, bool move = false) = 0;
+    virtual Interface::Holder entry(const char *name, const IType *type = NULL, bool create = false) = 0;
 
+    virtual bool copy(const Progress &callback, const Interface::Holder &file, bool move = false) = 0;
     virtual bool rename(const Interface::Holder &file, const char *name) = 0;
     virtual bool remove(const Interface::Holder &file) = 0;
 

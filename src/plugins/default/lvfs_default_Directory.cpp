@@ -204,7 +204,19 @@ Directory::const_iterator Directory::end() const
 
 bool Directory::exists(const char *name) const
 {
-    return false;
+    ASSERT(name != NULL);
+    char path[PATH_MAX];
+
+    if (UNLIKELY(std::snprintf(path, sizeof(path), "%s/%s", m_filePath, name) < 0))
+        return false;
+
+    int fd = ::open(path, O_RDONLY);
+
+    if (fd == -1)
+        return false;
+
+    ::close(fd);
+    return true;
 }
 
 Interface::Holder Directory::entry(const char *name, const IType *type, bool create)

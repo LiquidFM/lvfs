@@ -295,6 +295,15 @@ bool Directory::copy(const Progress &callback, const Interface::Holder &file, bo
     ::close(dest_file);
     delete [] buffer;
 
+    if (move)
+        if (::unlink(file->as<IEntry>()->location()) == 0)
+            m_lastError = 0;
+        else
+        {
+            m_lastError = errno;
+            return false;
+        }
+
     return true;
 }
 

@@ -28,11 +28,12 @@
 #include <linux/limits.h>
 
 
+WARN_UNUSED_RETURN_OFF
+
 namespace LVFS {
 namespace {
     static Module *s_instance;
 }
-WARN_UNUSED_RETURN_OFF
 
 const char Module::SchemaDelimiter[] = "://";
 const char Module::DirectoryTypeName[] = "inode/directory";
@@ -40,6 +41,7 @@ const char Module::DirectoryTypeName[] = "inode/directory";
 
 Module::Module()
 {
+    ASSERT((MaxUriLength - MaxSchemaLength - SchemaDelimiterLength) <= PATH_MAX);
     ASSERT(s_instance == NULL);
     s_instance = this;
 
@@ -186,6 +188,6 @@ bool Module::String::operator==(const String &other) const
     return strcmp(m_string, other.m_string) == 0;
 }
 
+}
 
 WARN_UNUSED_RETURN_ON
-}

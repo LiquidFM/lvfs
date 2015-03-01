@@ -43,7 +43,8 @@ public:
     enum
     {
         MaxSchemaLength = 128,
-        SchemaDelimiterLength = 3
+        SchemaDelimiterLength = 3,
+        MaxUriLength = MaxSchemaLength + SchemaDelimiterLength + 4096
     };
 
     static const char SchemaDelimiter[];

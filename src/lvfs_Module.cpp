@@ -18,7 +18,6 @@
  */
 
 #include "lvfs_Module.h"
-#include "plugins/default/lvfs_default_ProtocolPlugin.h"
 
 #include <lvfs/IEntry>
 #include <brolly/assert.h>
@@ -32,7 +31,6 @@
 namespace LVFS {
 namespace {
     static Module *s_instance;
-    static LVFS::ProtocolPlugin defaultPlugin;
 }
 WARN_UNUSED_RETURN_OFF
 
@@ -45,7 +43,7 @@ Module::Module()
     ASSERT(s_instance == NULL);
     s_instance = this;
 
-    m_protocolPlugins["file"].push_back(defaultPlugin.as<IProtocolPlugin>());
+    processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-core/liblvfs-core.so");
     processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-db/liblvfs-db.so");
     processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-arc/liblvfs-arc.so");
 }
@@ -82,7 +80,7 @@ Interface::Holder Module::open(const Interface::Holder &file)
 
 Interface::Holder Module::internalOpen(const char *uri, Error &error)
 {
-    char buffer[MaxSchemaLength];
+    char buffer[MaxSchemaLength] = { 'f', 'i', 'l', 'e' };
     Interface::Holder res;
 
     if (const char *delim = strstr(uri, SchemaDelimiter))
@@ -91,28 +89,25 @@ Interface::Holder Module::internalOpen(const char *uri, Error &error)
             memcpy(buffer, uri, delim - uri);
             buffer[delim - uri] = 0;
             uri = delim + SchemaDelimiterLength;
-
-            auto root = m_protocolPlugins.find(buffer);
-
-            if (root == m_protocolPlugins.end())
-                return res;
-            else
-                for (auto i : (*root).second)
-                {
-                    res = i->open(uri);
-
-                    if (res.isValid())
-                        break;
-                }
         }
         else
-            return Interface::Holder();
+            return res;
 
-    if (!res.isValid())
-        res = defaultPlugin.open(uri);
+    auto root = m_protocolPlugins.find(buffer);
+
+    if (root == m_protocolPlugins.end())
+        return res;
+    else
+        for (auto i : (*root).second)
+        {
+            res = i->open(uri);
+
+            if (res.isValid())
+                break;
+        }
 
     if (res.isValid())
-        return internalOpen(res);
+        res = internalOpen(res);
 
     return res;
 }

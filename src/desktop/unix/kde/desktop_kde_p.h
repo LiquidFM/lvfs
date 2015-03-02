@@ -73,13 +73,13 @@ struct DesktopPrivate
             {
                 if (const char *home = ::getenv("HOME"))
                 {
-                    char path[PATH_MAX];
+                    char path[Module::MaxUriLength];
                     struct stat st;
 
                     if (version == 4)
                     {
-                        ::strncpy(path, home, PATH_MAX - 1);
-                        ::strncat(path, "/.kde4", PATH_MAX - strlen(path) - 1);
+                        ::strncpy(path, home, sizeof(path) - 1);
+                        ::strncat(path, "/.kde4", sizeof(path) - strlen(path) - 1);
 
                         if (::stat(path, &st) == 0)
                         {
@@ -90,8 +90,8 @@ struct DesktopPrivate
 
                     if (kdeHomePath.data == NULL)
                     {
-                        ::strncpy(path, home, PATH_MAX - 1);
-                        ::strncat(path, "/.kde", PATH_MAX - strlen(path) - 1);
+                        ::strncpy(path, home, sizeof(path) - 1);
+                        ::strncat(path, "/.kde", sizeof(path) - strlen(path) - 1);
 
                         kdeHomePath.data = ::strdup(path);
                         kdeHomePath.shouldFree = true;

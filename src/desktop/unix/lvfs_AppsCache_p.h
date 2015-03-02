@@ -66,7 +66,7 @@ public:
 
     virtual bool open(const IEntry *entry) const
     {
-        char buffer[PATH_MAX];
+        char buffer[Module::MaxUriLength];
 
         if (::strlen(m_exec) > sizeof(buffer) - 1)
             return false;

@@ -21,6 +21,7 @@
 #define LVFS_IAPPLICATION_H_
 
 #include <lvfs/IEntry>
+#include <lvfs/Error>
 
 
 namespace LVFS {
@@ -35,6 +36,7 @@ public:
     virtual const char *name() const = 0;
     virtual const char *description() const = 0;
     virtual const Interface::Holder &icon() const = 0;
+    virtual const Error &lastError() const = 0;
 
     virtual bool open(const IEntry *entry) const = 0;
 };

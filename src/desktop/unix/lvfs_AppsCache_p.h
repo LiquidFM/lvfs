@@ -63,6 +63,7 @@ public:
     virtual const char *name() const { return m_name; }
     virtual const char *description() const { return m_description; }
     virtual const Interface::Holder &icon() const { return m_icon; }
+    virtual const Error &lastError() const { return m_lastError; }
 
     virtual bool open(const IEntry *entry) const
     {
@@ -106,60 +107,19 @@ public:
             if (::strstr(i, "%i"))
             {
                 static const char icon[] = "--icon";
-                size_t len = sizeof(icon) + 1 + ::strlen(m_icon->as<IEntry>()->location());
-
-                pos = static_cast<char *>(::malloc(len));
-
-                if (UNLIKELY(pos == NULL))
-                {
-                    for (auto i : args2)
-                        ::free(i);
-
-                    return false;
-                }
-
-                ::snprintf(pos, len, "%s %s", icon, m_icon->as<IEntry>()->location());
-
-                args2.push_back(pos);
+                args2.push_back(::strdup(icon));
+                args2.push_back(::strdup(m_icon->as<IEntry>()->location()));
             }
             else if (::strstr(i, "%f") ||
                      ::strstr(i, "%F") ||
                      ::strstr(i, "%u") ||
                      ::strstr(i, "%U"))
             {
-                size_t len = ::strlen(entry->location()) + 1;
-
-                pos = static_cast<char *>(::malloc(len));
-
-                if (UNLIKELY(pos == NULL))
-                {
-                    for (auto i : args2)
-                        ::free(i);
-
-                    return false;
-                }
-
-                ::strcpy(pos, entry->location());
-
-                args2.push_back(pos);
+                args2.push_back(::strdup(entry->location()));
             }
             else if (::strstr(i, "%c"))
             {
-                size_t len = ::strlen(m_name) + 1;
-
-                pos = static_cast<char *>(::malloc(len));
-
-                if (UNLIKELY(pos == NULL))
-                {
-                    for (auto i : args2)
-                        ::free(i);
-
-                    return false;
-                }
-
-                ::strcpy(pos, m_name);
-
-                args2.push_back(pos);
+                args2.push_back(::strdup(m_name));
             }
             else
                 args2.push_back(::strdup(i));
@@ -171,7 +131,7 @@ public:
 
             if (pid < 0)
             {
-//                error = Info::codec()->toUnicode(::strerror(errno));
+                m_lastError = errno;
                 return false;
             }
         }
@@ -196,6 +156,7 @@ private:
     char *m_description;
     char *m_exec;
     Interface::Holder m_icon;
+    mutable Error m_lastError;
 };
 
 

@@ -37,7 +37,7 @@ Error::~Error()
 
 const char *Error::description() const
 {
-    return strerror(m_code);
+    return ::strerror(m_code);
 }
 
 }

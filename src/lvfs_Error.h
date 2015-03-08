@@ -32,7 +32,9 @@ public:
     Error(int code);
     virtual ~Error();
 
-    int code() const { return m_code; }
+    inline bool isOk() const { return m_code == 0; }
+    inline int code() const { return m_code; }
+
     virtual const char *description() const;
 
 private:

@@ -107,7 +107,7 @@ public:
         if (m_holder.isValid())
             m_interface = m_holder->as<T>();
     }
-    inline explicit Adaptor(const Interface::Holder &interface) :
+    inline Adaptor(const Interface::Holder &interface) :
         m_holder(interface),
         m_interface(NULL)
     {

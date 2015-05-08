@@ -26,6 +26,8 @@
 #include <lvfs/Interface>
 #include <lvfs/IEntry>
 #include <lvfs/Error>
+#include <efc/List>
+#include <efc/Map>
 
 
 namespace LVFS {
@@ -84,6 +86,9 @@ public:
         Holder m_data;
     };
 
+    template <typename Container>
+    class PLATFORM_MAKE_PRIVATE std_iterator;
+
     struct Progress
     {
         void *arg;
@@ -125,14 +130,78 @@ IDirectory::const_iterator &IDirectory::const_iterator::operator++()
 { m_data->next(); return *this; }
 
 bool IDirectory::const_iterator::operator==(const const_iterator &x) const
-{ return m_data == x.m_data || m_data->isEqual(x.m_data); }
+{ return m_data == x.m_data || (m_data.isValid() && x.m_data.isValid() && m_data->isEqual(x.m_data)); }
 
 bool IDirectory::const_iterator::operator!=(const const_iterator &x) const
-{ return m_data != x.m_data && !m_data->isEqual(x.m_data); }
+{ return !operator==(x); }
 
 IDirectory::const_iterator::const_iterator(Implementation *imp) :
     m_data(imp)
 {}
+
+
+template <typename Container>
+class PLATFORM_MAKE_PRIVATE IDirectory::std_iterator : public const_iterator
+{
+public:
+    std_iterator(const typename Container::const_iterator &iterator) :
+        const_iterator(new (std::nothrow) Imp(iterator))
+    {}
+
+private:
+    class Imp : public Implementation
+    {
+    public:
+        Imp(const typename Container::const_iterator &iterator) :
+            m_iterator(iterator)
+        {}
+        virtual ~Imp()
+        {}
+
+        virtual bool isEqual(const Holder &other) const { return m_iterator == other.as<Imp>()->m_iterator; }
+        virtual reference asReference() const { return reference_adaptor<Container>::adapt(m_iterator); }
+        virtual pointer asPointer() const { return pointer_adaptor<Container>::adapt(m_iterator); }
+        virtual void next() { ++m_iterator; }
+
+    private:
+        template <typename C>
+        struct reference_adaptor;
+
+        template <typename T>
+        struct reference_adaptor< EFC::List<T> >
+        {
+            static inline reference adapt(const typename EFC::List<T>::const_iterator &iterator)
+            { return *iterator; }
+        };
+
+        template <typename K, typename V>
+        struct reference_adaptor< EFC::Map<K, V> >
+        {
+            static inline reference adapt(const typename EFC::Map<K, V>::const_iterator &iterator)
+            { return iterator->second; }
+        };
+
+        template <typename C>
+        struct pointer_adaptor;
+
+        template <typename T>
+        struct pointer_adaptor< EFC::List<T> >
+        {
+            static inline pointer adapt(const typename EFC::List<T>::const_iterator &iterator)
+            { return &(*iterator); }
+        };
+
+        template <typename K, typename V>
+        struct pointer_adaptor< EFC::Map<K, V> >
+        {
+            static inline pointer adapt(const typename EFC::Map<K, V>::const_iterator &iterator)
+            { return &iterator->second; }
+        };
+
+    private:
+        typename Container::const_iterator m_iterator;
+    };
+};
 
 }
 

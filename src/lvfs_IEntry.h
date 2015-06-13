@@ -21,7 +21,7 @@
 #define LVFS_IENTRY_H_
 
 #include <lvfs/IType>
-#include <lvfs/IFile>
+#include <lvfs/IStream>
 
 
 namespace LVFS {
@@ -37,7 +37,7 @@ public:
     virtual const char *schema() const = 0;
     virtual const char *location() const = 0;
     virtual const IType *type() const = 0;
-    virtual Interface::Holder open(IFile::Mode mode = IFile::Read) const = 0;
+    virtual Interface::Holder open(IStream::Mode mode = IStream::Read) const = 0;
 };
 
 }

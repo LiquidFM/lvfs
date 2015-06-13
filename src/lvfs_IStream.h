@@ -17,8 +17,8 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LVFS_IFILE_H_
-#define LVFS_IFILE_H_
+#ifndef LVFS_ISTREAM_H_
+#define LVFS_ISTREAM_H_
 
 #include <cstdio>
 #include <cstddef>
@@ -33,9 +33,9 @@ namespace LVFS {
  * XXX: This is a minimal interface
  * to read/write data from/to IEntry
  */
-class PLATFORM_MAKE_PUBLIC IFile
+class PLATFORM_MAKE_PUBLIC IStream
 {
-    DECLARE_INTERFACE(LVFS::IFile)
+    DECLARE_INTERFACE(LVFS::IStream)
 
 public:
     enum Mode
@@ -69,7 +69,7 @@ public:
     };
 
 public:
-    virtual ~IFile();
+    virtual ~IStream();
 
     virtual size_t read(void *buffer, size_t size) = 0;
     virtual size_t write(const void *buffer, size_t size) = 0;
@@ -82,4 +82,4 @@ public:
 
 }
 
-#endif /* LVFS_IFILE_H_ */
+#endif /* LVFS_ISTREAM_H_ */

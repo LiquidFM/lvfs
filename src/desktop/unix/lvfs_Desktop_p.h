@@ -306,6 +306,20 @@ Interface::Holder Desktop::applications(const IType *type) const
     return appsCache.findApplications(type);
 }
 
+Interface::Holder Desktop::typeOfFile(const char *filename, IconType iconType) const
+{
+    ASSERT(filename != NULL);
+    const char *mimeType = xdg_mime_get_mime_type_from_file_name(filename);
+
+    if (strcmp(mimeType, XDG_MIME_TYPE_UNKNOWN) == 0 ||
+        strcmp(mimeType, XDG_MIME_TYPE_EMPTY) == 0)
+    {
+        mimeType = XDG_MIME_TYPE_TEXTPLAIN;
+    }
+
+    return loadMimeType(mimeType, iconType);
+}
+
 Interface::Holder Desktop::typeOfFile(const IEntry *entry, IconType iconType) const
 {
     ASSERT(entry != NULL);
@@ -313,7 +327,7 @@ Interface::Holder Desktop::typeOfFile(const IEntry *entry, IconType iconType) co
 
     if (mimeType == XDG_MIME_TYPE_UNKNOWN)
     {
-        Interface::Holder file(entry->open(IFile::Read));
+        Interface::Holder file(entry->open(IStream::Read));
 
         if (file.isValid())
         {
@@ -322,7 +336,7 @@ Interface::Holder Desktop::typeOfFile(const IEntry *entry, IconType iconType) co
 
             if (LIKELY(buffer != NULL))
             {
-                len = file->as<IFile>()->read(buffer.get(), len);
+                len = file->as<IStream>()->read(buffer.get(), len);
 
                 if (len > 0)
                     mimeType = xdg_mime_get_mime_type_for_data(buffer.get(), len, NULL);
@@ -335,6 +349,23 @@ Interface::Holder Desktop::typeOfFile(const IEntry *entry, IconType iconType) co
     {
         mimeType = XDG_MIME_TYPE_TEXTPLAIN;
     }
+
+    return loadMimeType(mimeType, iconType);
+}
+
+Interface::Holder Desktop::typeOfDirectory() const
+{
+    return Interface::Holder(new (std::nothrow) MimeType(Module::DirectoryTypeName, "File system directory", iconCache.findMimeIcon(Module::DirectoryTypeName, SmallIcon, theme)));
+}
+
+Interface::Holder Desktop::typeOfUnknownFile() const
+{
+    return Interface::Holder(new (std::nothrow) MimeType(XDG_MIME_TYPE_UNKNOWN, "Unknown file", iconCache.findMimeIcon(XDG_MIME_TYPE_UNKNOWN, SmallIcon, theme)));
+}
+
+Interface::Holder Desktop::loadMimeType(const char *mimeType, IconType iconType) const
+{
+    ASSERT(mimeType != NULL);
 
     MimeType *type;
     Interface::Holder res(type = new (std::nothrow) MimeType(mimeType, mimeType));
@@ -399,16 +430,6 @@ Interface::Holder Desktop::typeOfFile(const IEntry *entry, IconType iconType) co
         }
 
     return res;
-}
-
-Interface::Holder Desktop::typeOfDirectory() const
-{
-    return Interface::Holder(new (std::nothrow) MimeType(Module::DirectoryTypeName, "File system directory", iconCache.findMimeIcon(Module::DirectoryTypeName, SmallIcon, theme)));
-}
-
-Interface::Holder Desktop::typeOfUnknownFile() const
-{
-    return Interface::Holder(new (std::nothrow) MimeType(XDG_MIME_TYPE_UNKNOWN, "Unknown file", iconCache.findMimeIcon(XDG_MIME_TYPE_UNKNOWN, SmallIcon, theme)));
 }
 
 }

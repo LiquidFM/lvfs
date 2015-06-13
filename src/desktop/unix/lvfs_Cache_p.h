@@ -48,7 +48,7 @@ public:
     virtual const char *schema() const { return "file"; }
     virtual const char *location() const { return m_filePath; }
     virtual const IType *type() const { return this; }
-    virtual Interface::Holder open(IFile::Mode mode) const { return Interface::Holder(); }
+    virtual Interface::Holder open(IStream::Mode mode) const { return Interface::Holder(); }
 
     virtual const char *name() const { return XDG_MIME_TYPE_UNKNOWN; }
     virtual Interface::Holder icon() const { return Interface::Holder(); }

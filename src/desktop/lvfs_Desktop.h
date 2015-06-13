@@ -73,11 +73,15 @@ public:
 
     const Locale &locale() const { return m_locale; }
     Interface::Holder applications(const IType *type) const;
+    Interface::Holder typeOfFile(const char *filename, IconType iconType = AppIconIfNoTypeIcon) const;
     Interface::Holder typeOfFile(const IEntry *file, IconType iconType = AppIconIfNoTypeIcon) const;
     Interface::Holder typeOfDirectory() const;
     Interface::Holder typeOfUnknownFile() const;
 
     const Error &lastError() const { return m_lastError; }
+
+private:
+    Interface::Holder loadMimeType(const char *mimeType, IconType iconType) const;
 
 private:
     Locale m_locale;

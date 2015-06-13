@@ -49,6 +49,7 @@ Module::Module()
     processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-db/liblvfs-db.so");
     processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-arc/liblvfs-arc.so");
     processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-qimg/liblvfs-qimg.so");
+    processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-bits/liblvfs-bits.so");
 }
 
 Module::~Module()

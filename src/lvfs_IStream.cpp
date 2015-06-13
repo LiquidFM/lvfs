@@ -17,12 +17,12 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lvfs_IFile.h"
+#include "lvfs_IStream.h"
 
 
 namespace LVFS {
 
-IFile::~IFile()
+IStream::~IStream()
 {}
 
 }

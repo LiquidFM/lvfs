@@ -17,6 +17,11 @@ endif ()
 find_package (Threads REQUIRED)
 list (APPEND ${PROJECT_NAME}_LIBS ${CMAKE_THREAD_LIBS_INIT})
 
+find_package (LibXml2 REQUIRED)
+include_directories (${LIBXML2_INCLUDE_DIR})
+list (APPEND ${PROJECT_NAME}_LIBS ${LIBXML2_LIBRARIES})
+add_definitions (${LIBXML2_DEFINITIONS})
+
 # Sources
 add_subdirectory (src)
 
@@ -42,6 +47,12 @@ install_header_files (lvfs "src/desktop/lvfs_Desktop.h:Desktop"
                            "src/lvfs_IStream.h:IStream"
                            "src/lvfs_IType.h:IType"
                            "src/lvfs_Module.h:Module"
+
+                           "src/settings/lvfs_settings_Option.h:settings/Option"
+                           "src/settings/lvfs_settings_IntOption.h:settings/IntOption"
+                           "src/settings/lvfs_settings_Scope.h:settings/Scope"
+                           "src/settings/lvfs_settings_Visitor.h:settings/Visitor"
+                           "src/settings/lvfs_settings_Instance.h:settings/Instance"
 
                            "src/plugins/lvfs_IContentPlugin.h:plugins/IContentPlugin"
                            "src/plugins/lvfs_IProtocolPlugin.h:plugins/IProtocolPlugin"

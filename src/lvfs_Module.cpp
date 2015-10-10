@@ -39,7 +39,8 @@ const char Module::SchemaDelimiter[] = "://";
 const char Module::DirectoryTypeName[] = "inode/directory";
 
 
-Module::Module()
+Module::Module(Settings::Instance &settings) :
+    m_settings(settings)
 {
     ASSERT((MaxUriLength - MaxSchemaLength - SchemaDelimiterLength) <= PATH_MAX);
     ASSERT(s_instance == NULL);
@@ -50,6 +51,7 @@ Module::Module()
     processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-arc/liblvfs-arc.so");
     processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-qimg/liblvfs-qimg.so");
     processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-bits/liblvfs-bits.so");
+    processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-qplayer/liblvfs-qplayer.so");
 }
 
 Module::~Module()

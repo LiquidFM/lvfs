@@ -74,7 +74,7 @@ public:
     virtual size_t read(void *buffer, size_t size) = 0;
     virtual size_t write(const void *buffer, size_t size) = 0;
     virtual bool advise(off64_t offset, off64_t len, Advise advise) = 0;
-    virtual bool seek(off64_t offset, Whence whence = FromCurrent) = 0;
+    virtual bool seek(off64_t offset, Whence whence = FromBeginning) = 0;
     virtual bool flush() = 0;
 
     virtual const Error &lastError() const = 0;

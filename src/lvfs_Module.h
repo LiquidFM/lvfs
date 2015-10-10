@@ -28,6 +28,7 @@
 #include <lvfs/Error>
 #include <lvfs/Interface>
 #include <lvfs/plugins/Package>
+#include <lvfs/settings/Instance>
 #include <lvfs/Desktop>
 
 
@@ -53,7 +54,7 @@ public:
     typedef ::LVFS::Error Error;
 
 public:
-    Module();
+    Module(Settings::Instance &settings);
     ~Module();
 
     static const Desktop &desktop();
@@ -94,6 +95,7 @@ private:
     };
 
 private:
+    Settings::Instance &m_settings;
     ::EFC::List<Plugin> m_plugins;
     ::EFC::Map<String, ::EFC::List<const IContentPlugin *>> m_contentPlugins;
     ::EFC::Map<String, ::EFC::List<const IProtocolPlugin *>> m_protocolPlugins;

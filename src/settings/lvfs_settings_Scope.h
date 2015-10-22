@@ -43,7 +43,7 @@ public:
     virtual void manage(Option *option);
     virtual void accept(Visitor &visitor);
 
-private:
+protected:
     Container m_options;
 };
 

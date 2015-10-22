@@ -17,30 +17,41 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LVFS_SETTINGS_VISITOR_H_
-#define LVFS_SETTINGS_VISITOR_H_
+#ifndef LVFS_SETTINGS_LIST_H_
+#define LVFS_SETTINGS_LIST_H_
 
-#include <platform/utils.h>
+#include <efc/List>
+#include <lvfs/settings/Option>
 
 
 namespace LVFS {
 namespace Settings {
 
-class List;
-class Scope;
-class IntOption;
-
-
-class PLATFORM_MAKE_PUBLIC Visitor
+class PLATFORM_MAKE_PUBLIC List : public Option
 {
 public:
-    virtual ~Visitor();
+    typedef EFC::List<Option *> Container;
 
-    virtual void visit(List &option);
-    virtual void visit(Scope &option);
-    virtual void visit(IntOption &option) = 0;
+public:
+    List(Option *value, Option *parent = 0) :
+        Option(value->id(), parent),
+        m_value(value)
+    {}
+    virtual ~List();
+
+    Option *value() const { return m_value; }
+    const Container &values() const { return m_values; }
+
+    void add(Option *value);
+    void clear();
+
+    virtual void accept(Visitor &visitor);
+
+private:
+    Option *m_value;
+    Container m_values;
 };
 
 }}
 
-#endif /* LVFS_SETTINGS_VISITOR_H_ */
+#endif /* LVFS_SETTINGS_LIST_H_ */

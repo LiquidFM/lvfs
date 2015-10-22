@@ -27,6 +27,9 @@ namespace Settings {
 Visitor::~Visitor()
 {}
 
+void Visitor::visit(List &option)
+{}
+
 void Visitor::visit(Scope &option)
 {
     for (auto i : option.options())

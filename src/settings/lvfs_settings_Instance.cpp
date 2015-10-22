@@ -20,21 +20,39 @@
 #include "lvfs_settings_Instance.h"
 #include "lvfs_settings_Visitor.h"
 #include "lvfs_settings_Scope.h"
+#include "lvfs_settings_List.h"
 #include "lvfs_settings_IntOption.h"
 
 #include <lvfs/Module>
+#include <efc/ScopedPointer>
 
 #include <libxml/encoding.h>
 #include <libxml/xmlreader.h>
 #include <libxml/xmlwriter.h>
 
 #include <cstring>
+#include <cassert>
 
 
 namespace LVFS {
 namespace Settings {
 
 namespace {
+
+class ListScope : public Scope
+{
+public:
+    ListScope(const char *id, Option *parent = 0) :
+        Scope(id, parent)
+    {}
+
+    virtual ~ListScope()
+    {
+        for (Container::iterator i = m_options.begin(); i != m_options.end(); i = m_options.erase(i))
+            delete *i;
+    }
+};
+
 
 class DefaultInitializer : public Visitor
 {
@@ -45,16 +63,173 @@ public:
     }
 };
 
-class Loader : public Visitor
+
+class DefaultListScopeLoader : public Visitor
 {
 public:
-    Loader(xmlTextReaderPtr reader) :
+    DefaultListScopeLoader(xmlTextReaderPtr reader, Scope *scope) :
+        m_scope(scope),
         m_name(NULL),
         m_value(NULL),
         m_reader(reader)
     {}
 
+    virtual void visit(List &option)
+    {}
+
     virtual void visit(Scope &option)
+    {
+        EFC::ScopedPointer<ListScope> value(new (std::nothrow) ListScope(option.id()));
+
+        if (UNLIKELY(value.get() == NULL))
+            return;
+
+        Scope *scope = m_scope;
+        m_scope = value.get();
+
+        for (auto i : option.options())
+            i->accept(*this);
+
+        m_scope = scope;
+        m_scope->manage(value.release());
+    }
+
+    virtual void visit(IntOption &option)
+    {
+        EFC::ScopedPointer<IntOption> value(new (std::nothrow) IntOption(option.id(), option.defaultValue()));
+
+        if (UNLIKELY(value.get() == NULL))
+            return;
+
+        value->accept(m_default);
+        m_scope->manage(value.release());
+    }
+
+private:
+    Scope *m_scope;
+    const xmlChar *m_name;
+    const xmlChar *m_value;
+    xmlTextReaderPtr m_reader;
+    DefaultInitializer m_default;
+};
+
+
+class Loader : public Visitor
+{
+public:
+    struct State
+    {
+        enum Type
+        {
+            Loader,
+            ListLoader,
+            ListScopeLoader
+        };
+    };
+
+public:
+    Loader(xmlTextReaderPtr reader) :
+        m_valid(true),
+        m_list(NULL),
+        m_scope(NULL),
+        m_state(State::Loader),
+        m_name(NULL),
+        m_value(NULL),
+        m_reader(reader)
+    {}
+
+    virtual void visit(List &option)
+    {
+        switch (m_state)
+        {
+            case State::Loader:
+                loader(option);
+                break;
+
+            case State::ListLoader:
+                listLoader(option);
+                break;
+
+            case State::ListScopeLoader:
+                listScopeLoader(option);
+                break;
+        }
+    }
+
+    virtual void visit(Scope &option)
+    {
+        switch (m_state)
+        {
+            case State::Loader:
+                loader(option);
+                break;
+
+            case State::ListLoader:
+                listLoader(option);
+                break;
+
+            case State::ListScopeLoader:
+                listScopeLoader(option);
+                break;
+        }
+    }
+
+    virtual void visit(IntOption &option)
+    {
+        switch (m_state)
+        {
+            case State::Loader:
+                loader(option);
+                break;
+
+            case State::ListLoader:
+                listLoader(option);
+                break;
+
+            case State::ListScopeLoader:
+                listScopeLoader(option);
+                break;
+        }
+    }
+
+private:
+    inline void loader(List &option)
+    {
+        m_name = xmlTextReaderConstName(m_reader);
+
+        if (m_name != NULL &&
+            ::strcmp("list", reinterpret_cast<const char *>(m_name)) == 0 &&
+            (m_name = xmlTextReaderGetAttribute(m_reader, BAD_CAST "name")) != NULL &&
+            ::strcmp(option.id(), reinterpret_cast<const char *>(m_name)) == 0 &&
+            xmlTextReaderRead(m_reader) == 1)
+        {
+            m_state = State::ListLoader;
+            m_list = &option;
+
+            do
+            {
+                option.value()->accept(*this);
+
+                if (!m_valid)
+                    break;
+
+                m_name = xmlTextReaderConstName(m_reader);
+
+                if (m_name == NULL)
+                    break;
+                else if (::strcmp("list", reinterpret_cast<const char *>(m_name)) == 0)
+                {
+                    xmlTextReaderRead(m_reader);
+                    break;
+                }
+            }
+            while (true);
+
+            m_state = State::Loader;
+        }
+    }
+
+    inline void loader(Scope &option)
     {
         m_name = xmlTextReaderConstName(m_reader);
 
@@ -64,12 +239,15 @@ public:
             option.accept(m_default);
         else
             if (xmlTextReaderRead(m_reader) == 1)
+            {
                 Visitor::visit(option);
+                xmlTextReaderRead(m_reader);
+            }
             else
                 option.accept(m_default);
     }
 
-    virtual void visit(IntOption &option)
+    inline void loader(IntOption &option)
     {
         m_name = xmlTextReaderConstName(m_reader);
 
@@ -83,19 +261,331 @@ public:
 
             if (m_value == NULL)
                 option.accept(m_default);
+            else if (xmlTextReaderRead(m_reader) != 1)
+                option.accept(m_default);
             else
+            {
                 option.setValue(::strtol(reinterpret_cast<const char *>(m_value), NULL, 10));
+                xmlTextReaderRead(m_reader);
+            }
         }
         else
             option.accept(m_default);
     }
 
+    inline void listLoader(List &option)
+    {
+        m_name = xmlTextReaderConstName(m_reader);
+
+        if (m_name == NULL)
+            m_valid = false;
+        else if (::strcmp("list", reinterpret_cast<const char *>(m_name)) != 0)
+            m_valid = false;
+        else if ((m_name = xmlTextReaderGetAttribute(m_reader, BAD_CAST "name")) == NULL || ::strcmp(option.id(), reinterpret_cast<const char *>(m_name)) != 0)
+            m_valid = false;
+        else if (xmlTextReaderRead(m_reader) != 1)
+            m_valid = false;
+        else
+        {
+            EFC::ScopedPointer<List> value(new (std::nothrow) List(option.value()));
+
+            if (UNLIKELY(value.get() == NULL))
+                m_valid = false;
+            else
+            {
+                List *list = m_list;
+                m_list = value.get();
+
+                do
+                {
+                    option.value()->accept(*this);
+
+                    if (!m_valid)
+                    {
+                        m_list = list;
+                        return;
+                    }
+
+                    m_name = xmlTextReaderConstName(m_reader);
+
+                    if (m_name == NULL)
+                    {
+                        m_list = list;
+                        return;
+                    }
+                    else if (::strcmp("list", reinterpret_cast<const char *>(m_name)) == 0)
+                    {
+                        m_valid = xmlTextReaderRead(m_reader) == 1;
+                        break;
+                    }
+                }
+                while (true);
+
+                m_list = list;
+                m_list->add(value.release());
+            }
+        }
+    }
+
+    inline void listLoader(Scope &option)
+    {
+        m_name = xmlTextReaderConstName(m_reader);
+
+        if (m_name == NULL)
+            m_valid = false;
+        else if (::strcmp(option.id(), reinterpret_cast<const char *>(m_name)) != 0)
+            m_valid = false;
+        else if (xmlTextReaderRead(m_reader) != 1)
+            m_valid = false;
+        else
+        {
+            EFC::ScopedPointer<ListScope> value(new (std::nothrow) ListScope(option.id()));
+
+            if (UNLIKELY(value.get() == NULL))
+                m_valid = false;
+            else
+            {
+                Scope *scope = m_scope;
+                m_scope = value.get();
+                m_state = State::ListScopeLoader;
+
+                for (auto i : option.options())
+                {
+                    i->accept(*this);
+
+                    if (!m_valid)
+                    {
+                        m_scope = scope;
+                        return;
+                    }
+                }
+
+                m_scope = scope;
+                m_state = State::ListLoader;
+
+                m_list->add(value.release());
+                m_valid = xmlTextReaderRead(m_reader) == 1;
+            }
+        }
+    }
+
+    inline void listLoader(IntOption &option)
+    {
+        m_name = xmlTextReaderConstName(m_reader);
+
+        if (m_name == NULL)
+            m_valid = false;
+        else if (::strcmp(option.id(), reinterpret_cast<const char *>(m_name)) != 0)
+            m_valid = false;
+        else if (xmlTextReaderRead(m_reader) != 1)
+            m_valid = false;
+        else
+        {
+            m_value = xmlTextReaderConstValue(m_reader);
+
+            if (m_value == NULL)
+                m_valid = false;
+            else if (xmlTextReaderRead(m_reader) != 1)
+                m_valid = false;
+            else
+            {
+                EFC::ScopedPointer<IntOption> value(new (std::nothrow) IntOption(option.id(), option.defaultValue()));
+
+                if (UNLIKELY(value.get() == NULL))
+                    m_valid = false;
+                else
+                {
+                    value->setValue(::strtol(reinterpret_cast<const char *>(m_value), NULL, 10));
+                    m_list->add(value.release());
+                    m_valid = xmlTextReaderRead(m_reader) == 1;
+                }
+            }
+        }
+    }
+
+    inline void listScopeLoader(List &option)
+    {
+        EFC::ScopedPointer<List> value(new (std::nothrow) List(option.value()));
+
+        if (UNLIKELY(value.get() == NULL))
+        {
+            m_valid = false;
+            return;
+        }
+
+        m_name = xmlTextReaderConstName(m_reader);
+
+        if (m_name == NULL)
+            m_valid = false;
+        else if (::strcmp("list", reinterpret_cast<const char *>(m_name)) != 0)
+            m_valid = false;
+        else if ((m_name = xmlTextReaderGetAttribute(m_reader, BAD_CAST "name")) == NULL || ::strcmp(option.id(), reinterpret_cast<const char *>(m_name)) != 0)
+            m_valid = false;
+        else if (xmlTextReaderRead(m_reader) != 1)
+            m_valid = false;
+        else
+        {
+            List *list = m_list;
+            m_list = value.get();
+            m_state = State::ListLoader;
+
+            do
+            {
+                option.value()->accept(*this);
+
+                if (!m_valid)
+                {
+                    m_valid = false;
+                    break;
+                }
+
+                m_name = xmlTextReaderConstName(m_reader);
+
+                if (m_name == NULL)
+                {
+                    m_valid = false;
+                    break;
+                }
+                else if (::strcmp("list", reinterpret_cast<const char *>(m_name)) == 0)
+                {
+                    m_valid = xmlTextReaderRead(m_reader) == 1;
+                    break;
+                }
+            }
+            while (true);
+
+            m_list = list;
+            m_state = State::ListScopeLoader;
+        }
+
+        m_scope->manage(value.release());
+    }
+
+    inline void listScopeLoader(Scope &option)
+    {
+        EFC::ScopedPointer<ListScope> value(new (std::nothrow) ListScope(option.id()));
+
+        if (UNLIKELY(value.get() == NULL))
+        {
+            m_valid = false;
+            return;
+        }
+
+        m_name = xmlTextReaderConstName(m_reader);
+
+        if (m_name == NULL)
+        {
+            DefaultListScopeLoader loader(m_reader, value.get());
+
+            for (auto i : option.options())
+                i->accept(loader);
+
+            m_valid = false;
+        }
+        else if (::strcmp(option.id(), reinterpret_cast<const char *>(m_name)) != 0)
+        {
+            DefaultListScopeLoader loader(m_reader, value.get());
+
+            for (auto i : option.options())
+                i->accept(loader);
+
+            m_valid = false;
+        }
+        else
+            if (xmlTextReaderRead(m_reader) == 1)
+            {
+                Scope *scope = m_scope;
+                m_scope = value.get();
+
+                for (auto i : option.options())
+                {
+                    i->accept(*this);
+
+                    if (!m_valid)
+                    {
+                        m_scope = scope;
+                        return;
+                    }
+                }
+
+                m_scope = scope;
+                m_valid = xmlTextReaderRead(m_reader) == 1;
+            }
+            else
+            {
+                DefaultListScopeLoader loader(m_reader, value.get());
+
+                for (auto i : option.options())
+                    i->accept(loader);
+
+                m_valid = false;
+            }
+
+        m_scope->manage(value.release());
+    }
+
+    inline void listScopeLoader(IntOption &option)
+    {
+        EFC::ScopedPointer<IntOption> value(new (std::nothrow) IntOption(option.id(), option.defaultValue()));
+
+        if (UNLIKELY(value.get() == NULL))
+        {
+            m_valid = false;
+            return;
+        }
+
+        m_name = xmlTextReaderConstName(m_reader);
+
+        if (m_name == NULL)
+        {
+            value->accept(m_default);
+            m_valid = false;
+        }
+        else if (::strcmp(value->id(), reinterpret_cast<const char *>(m_name)) != 0)
+        {
+            value->accept(m_default);
+            m_valid = false;
+        }
+        else if (xmlTextReaderRead(m_reader) == 1)
+        {
+            m_value = xmlTextReaderConstValue(m_reader);
+
+            if (m_value == NULL)
+            {
+                value->accept(m_default);
+                m_valid = false;
+            }
+            else if (xmlTextReaderRead(m_reader) != 1)
+            {
+                value->accept(m_default);
+                m_valid = false;
+            }
+            else
+            {
+                value->setValue(::strtol(reinterpret_cast<const char *>(m_value), NULL, 10));
+                m_valid = xmlTextReaderRead(m_reader) == 1;
+            }
+        }
+        else
+        {
+            value->accept(m_default);
+            m_valid = false;
+        }
+
+        m_scope->manage(value.release());
+    }
+
 private:
+    bool m_valid;
+    List *m_list;
+    Scope *m_scope;
+    State::Type m_state;
     const xmlChar *m_name;
     const xmlChar *m_value;
     xmlTextReaderPtr m_reader;
     DefaultInitializer m_default;
 };
+
 
 class Saver : public Visitor
 {
@@ -106,6 +596,26 @@ public:
     {}
 
     bool isValid() const { return m_valid; }
+
+    virtual void visit(List &option)
+    {
+        if (xmlTextWriterStartElement(m_writer, BAD_CAST "list") < 0)
+            m_valid = false;
+        else if (xmlTextWriterWriteFormatAttribute(m_writer, BAD_CAST "name", "%s", option.id()) < 0)
+            m_valid = false;
+        else
+        {
+            for (auto i : option.values())
+            {
+                i->accept(*this);
+
+                if (!m_valid)
+                    return;
+            }
+
+            m_valid = xmlTextWriterEndElement(m_writer) >= 0;
+        }
+    }
 
     virtual void visit(Scope &option)
     {
@@ -222,19 +732,3 @@ void Instance::save(const Container &container) const
 }
 
 }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

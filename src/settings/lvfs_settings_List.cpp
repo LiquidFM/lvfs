@@ -17,30 +17,32 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LVFS_SETTINGS_VISITOR_H_
-#define LVFS_SETTINGS_VISITOR_H_
-
-#include <platform/utils.h>
+#include "lvfs_settings_List.h"
+#include "lvfs_settings_Visitor.h"
 
 
 namespace LVFS {
 namespace Settings {
 
-class List;
-class Scope;
-class IntOption;
-
-
-class PLATFORM_MAKE_PUBLIC Visitor
+List::~List()
 {
-public:
-    virtual ~Visitor();
+    clear();
+}
 
-    virtual void visit(List &option);
-    virtual void visit(Scope &option);
-    virtual void visit(IntOption &option) = 0;
-};
+void List::add(Option *value)
+{
+    m_values.push_back(value);
+}
+
+void List::clear()
+{
+    for (Container::iterator i = m_values.begin(); i != m_values.end(); i = m_values.erase(i))
+        delete *i;
+}
+
+void List::accept(Visitor &visitor)
+{
+    visitor.visit(*this);
+}
 
 }}
-
-#endif /* LVFS_SETTINGS_VISITOR_H_ */

@@ -50,6 +50,7 @@ install_header_files (lvfs "src/desktop/lvfs_Desktop.h:Desktop"
 
                            "src/settings/lvfs_settings_Option.h:settings/Option"
                            "src/settings/lvfs_settings_IntOption.h:settings/IntOption"
+                           "src/settings/lvfs_settings_StringOption.h:settings/StringOption"
                            "src/settings/lvfs_settings_List.h:settings/List"
                            "src/settings/lvfs_settings_Scope.h:settings/Scope"
                            "src/settings/lvfs_settings_Visitor.h:settings/Visitor"

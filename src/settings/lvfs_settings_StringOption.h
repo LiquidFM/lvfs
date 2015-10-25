@@ -17,32 +17,32 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LVFS_SETTINGS_VISITOR_H_
-#define LVFS_SETTINGS_VISITOR_H_
+#ifndef LVFS_SETTINGS_STRINGOPTION_H_
+#define LVFS_SETTINGS_STRINGOPTION_H_
 
-#include <platform/utils.h>
+#include <lvfs/settings/Option>
 
 
 namespace LVFS {
 namespace Settings {
 
-class List;
-class Scope;
-class IntOption;
-class StringOption;
-
-
-class PLATFORM_MAKE_PUBLIC Visitor
+class PLATFORM_MAKE_PUBLIC StringOption : public Option
 {
 public:
-    virtual ~Visitor();
+    StringOption(const char *id, const char *defaultValue, Option *parent = 0);
+    virtual ~StringOption();
 
-    virtual void visit(List &option);
-    virtual void visit(Scope &option);
-    virtual void visit(IntOption &option) = 0;
-    virtual void visit(StringOption &option) = 0;
+    inline const char *value() const { return m_value; }
+    void setValue(const char *value);
+    inline const char *defaultValue() const { return m_defaultValue; }
+
+    virtual void accept(Visitor &visitor);
+
+private:
+    char *m_value;
+    const char *m_defaultValue;
 };
 
 }}
 
-#endif /* LVFS_SETTINGS_VISITOR_H_ */
+#endif /* LVFS_SETTINGS_STRINGOPTION_H_ */

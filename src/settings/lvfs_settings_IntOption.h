@@ -31,7 +31,7 @@ class PLATFORM_MAKE_PUBLIC IntOption : public Option
 public:
     IntOption(const char *id, int defaultValue, Option *parent = 0) :
         Option(id, parent),
-        m_value(0),
+        m_value(defaultValue),
         m_defaultValue(defaultValue)
     {}
     virtual ~IntOption();

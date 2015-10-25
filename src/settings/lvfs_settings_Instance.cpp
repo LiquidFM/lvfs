@@ -22,6 +22,7 @@
 #include "lvfs_settings_Scope.h"
 #include "lvfs_settings_List.h"
 #include "lvfs_settings_IntOption.h"
+#include "lvfs_settings_StringOption.h"
 
 #include <lvfs/Module>
 #include <efc/ScopedPointer>
@@ -50,16 +51,6 @@ public:
     {
         for (Container::iterator i = m_options.begin(); i != m_options.end(); i = m_options.erase(i))
             delete *i;
-    }
-};
-
-
-class DefaultInitializer : public Visitor
-{
-public:
-    virtual void visit(IntOption &option)
-    {
-        option.setValue(option.defaultValue());
     }
 };
 
@@ -101,7 +92,16 @@ public:
         if (UNLIKELY(value.get() == NULL))
             return;
 
-        value->accept(m_default);
+        m_scope->manage(value.release());
+    }
+
+    virtual void visit(StringOption &option)
+    {
+        EFC::ScopedPointer<StringOption> value(new (std::nothrow) StringOption(option.id(), option.defaultValue()));
+
+        if (UNLIKELY(value.get() == NULL))
+            return;
+
         m_scope->manage(value.release());
     }
 
@@ -110,7 +110,6 @@ private:
     const xmlChar *m_name;
     const xmlChar *m_value;
     xmlTextReaderPtr m_reader;
-    DefaultInitializer m_default;
 };
 
 
@@ -192,6 +191,24 @@ public:
         }
     }
 
+    virtual void visit(StringOption &option)
+    {
+        switch (m_state)
+        {
+            case State::Loader:
+                loader(option);
+                break;
+
+            case State::ListLoader:
+                listLoader(option);
+                break;
+
+            case State::ListScopeLoader:
+                listScopeLoader(option);
+                break;
+        }
+    }
+
 private:
     inline void loader(List &option)
     {
@@ -231,46 +248,45 @@ private:
 
     inline void loader(Scope &option)
     {
-        m_name = xmlTextReaderConstName(m_reader);
-
-        if (m_name == NULL)
-            option.accept(m_default);
-        else if (::strcmp(option.id(), reinterpret_cast<const char *>(m_name)) != 0)
-            option.accept(m_default);
-        else
-            if (xmlTextReaderRead(m_reader) == 1)
-            {
-                Visitor::visit(option);
-                xmlTextReaderRead(m_reader);
-            }
-            else
-                option.accept(m_default);
+        if ((m_name = xmlTextReaderConstName(m_reader)) != NULL &&
+            ::strcmp(option.id(), reinterpret_cast<const char *>(m_name)) == 0 &&
+            xmlTextReaderRead(m_reader) == 1)
+        {
+            Visitor::visit(option);
+            xmlTextReaderRead(m_reader);
+        }
     }
 
     inline void loader(IntOption &option)
     {
-        m_name = xmlTextReaderConstName(m_reader);
-
-        if (m_name == NULL)
-            option.accept(m_default);
-        else if (::strcmp(option.id(), reinterpret_cast<const char *>(m_name)) != 0)
-            option.accept(m_default);
-        else if (xmlTextReaderRead(m_reader) == 1)
+        if ((m_name = xmlTextReaderConstName(m_reader)) != NULL &&
+            ::strcmp(option.id(), reinterpret_cast<const char *>(m_name)) == 0 &&
+            xmlTextReaderRead(m_reader) == 1)
         {
             m_value = xmlTextReaderConstValue(m_reader);
 
-            if (m_value == NULL)
-                option.accept(m_default);
-            else if (xmlTextReaderRead(m_reader) != 1)
-                option.accept(m_default);
-            else
+            if (m_value != NULL && xmlTextReaderRead(m_reader) == 1)
             {
                 option.setValue(::strtol(reinterpret_cast<const char *>(m_value), NULL, 10));
                 xmlTextReaderRead(m_reader);
             }
         }
-        else
-            option.accept(m_default);
+    }
+
+    inline void loader(StringOption &option)
+    {
+        if ((m_name = xmlTextReaderConstName(m_reader)) != NULL &&
+            ::strcmp(option.id(), reinterpret_cast<const char *>(m_name)) == 0 &&
+            xmlTextReaderRead(m_reader) == 1)
+        {
+            m_value = xmlTextReaderConstValue(m_reader);
+
+            if (m_value != NULL && xmlTextReaderRead(m_reader) == 1)
+            {
+                option.setValue(reinterpret_cast<const char *>(m_value));
+                xmlTextReaderRead(m_reader);
+            }
+        }
     }
 
     inline void listLoader(List &option)
@@ -396,6 +412,40 @@ private:
                 else
                 {
                     value->setValue(::strtol(reinterpret_cast<const char *>(m_value), NULL, 10));
+                    m_list->add(value.release());
+                    m_valid = xmlTextReaderRead(m_reader) == 1;
+                }
+            }
+        }
+    }
+
+    inline void listLoader(StringOption &option)
+    {
+        m_name = xmlTextReaderConstName(m_reader);
+
+        if (m_name == NULL)
+            m_valid = false;
+        else if (::strcmp(option.id(), reinterpret_cast<const char *>(m_name)) != 0)
+            m_valid = false;
+        else if (xmlTextReaderRead(m_reader) != 1)
+            m_valid = false;
+        else
+        {
+            m_value = xmlTextReaderConstValue(m_reader);
+
+            if (m_value == NULL)
+                m_valid = false;
+            else if (xmlTextReaderRead(m_reader) != 1)
+                m_valid = false;
+            else
+            {
+                EFC::ScopedPointer<StringOption> value(new (std::nothrow) StringOption(option.id(), option.defaultValue()));
+
+                if (UNLIKELY(value.get() == NULL))
+                    m_valid = false;
+                else
+                {
+                    value->setValue(reinterpret_cast<const char *>(m_value));
                     m_list->add(value.release());
                     m_valid = xmlTextReaderRead(m_reader) == 1;
                 }
@@ -537,39 +587,60 @@ private:
         m_name = xmlTextReaderConstName(m_reader);
 
         if (m_name == NULL)
-        {
-            value->accept(m_default);
             m_valid = false;
-        }
         else if (::strcmp(value->id(), reinterpret_cast<const char *>(m_name)) != 0)
-        {
-            value->accept(m_default);
             m_valid = false;
-        }
-        else if (xmlTextReaderRead(m_reader) == 1)
+        else if (xmlTextReaderRead(m_reader) != 1)
+            m_valid = false;
+        else
         {
             m_value = xmlTextReaderConstValue(m_reader);
 
             if (m_value == NULL)
-            {
-                value->accept(m_default);
                 m_valid = false;
-            }
             else if (xmlTextReaderRead(m_reader) != 1)
-            {
-                value->accept(m_default);
                 m_valid = false;
-            }
             else
             {
                 value->setValue(::strtol(reinterpret_cast<const char *>(m_value), NULL, 10));
                 m_valid = xmlTextReaderRead(m_reader) == 1;
             }
         }
+
+        m_scope->manage(value.release());
+    }
+
+    inline void listScopeLoader(StringOption &option)
+    {
+        EFC::ScopedPointer<StringOption> value(new (std::nothrow) StringOption(option.id(), option.defaultValue()));
+
+        if (UNLIKELY(value.get() == NULL))
+        {
+            m_valid = false;
+            return;
+        }
+
+        m_name = xmlTextReaderConstName(m_reader);
+
+        if (m_name == NULL)
+            m_valid = false;
+        else if (::strcmp(value->id(), reinterpret_cast<const char *>(m_name)) != 0)
+            m_valid = false;
+        else if (xmlTextReaderRead(m_reader) != 1)
+            m_valid = false;
         else
         {
-            value->accept(m_default);
-            m_valid = false;
+            m_value = xmlTextReaderConstValue(m_reader);
+
+            if (m_value == NULL)
+                m_valid = false;
+            else if (xmlTextReaderRead(m_reader) != 1)
+                m_valid = false;
+            else
+            {
+                value->setValue(reinterpret_cast<const char *>(m_value));
+                m_valid = xmlTextReaderRead(m_reader) == 1;
+            }
         }
 
         m_scope->manage(value.release());
@@ -583,7 +654,6 @@ private:
     const xmlChar *m_name;
     const xmlChar *m_value;
     xmlTextReaderPtr m_reader;
-    DefaultInitializer m_default;
 };
 
 
@@ -633,6 +703,11 @@ public:
     virtual void visit(IntOption &option)
     {
         m_valid = xmlTextWriterWriteFormatElement(m_writer, BAD_CAST option.id(), "%d", option.value()) >= 0;
+    }
+
+    virtual void visit(StringOption &option)
+    {
+        m_valid = xmlTextWriterWriteFormatElement(m_writer, BAD_CAST option.id(), "%s", option.value()) >= 0;
     }
 
 private:
@@ -689,13 +764,6 @@ void Instance::load(const Container &container) const
 
         for (Container::const_iterator i = container.begin(), end = container.end(); i != end; ++i)
             i->second->accept(loader);
-    }
-    else
-    {
-        DefaultInitializer visitor;
-
-        for (Container::const_iterator i = container.begin(), end = container.end(); i != end; ++i)
-            i->second->accept(visitor);
     }
 
     xmlFreeTextReader(reader);

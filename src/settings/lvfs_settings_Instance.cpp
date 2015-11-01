@@ -265,9 +265,10 @@ private:
         {
             m_value = xmlTextReaderConstValue(m_reader);
 
-            if (m_value != NULL && xmlTextReaderRead(m_reader) == 1)
+            if (m_value != NULL)
             {
                 option.setValue(::strtol(reinterpret_cast<const char *>(m_value), NULL, 10));
+                xmlTextReaderRead(m_reader);
                 xmlTextReaderRead(m_reader);
             }
         }
@@ -281,9 +282,10 @@ private:
         {
             m_value = xmlTextReaderConstValue(m_reader);
 
-            if (m_value != NULL && xmlTextReaderRead(m_reader) == 1)
+            if (m_value != NULL)
             {
                 option.setValue(reinterpret_cast<const char *>(m_value));
+                xmlTextReaderRead(m_reader);
                 xmlTextReaderRead(m_reader);
             }
         }

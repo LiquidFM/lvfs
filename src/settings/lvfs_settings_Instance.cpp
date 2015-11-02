@@ -340,7 +340,7 @@ private:
                 while (true);
 
                 m_list = list;
-                m_list->add(value.release());
+                m_list->values().push_back(value.release());
             }
         }
     }
@@ -381,7 +381,7 @@ private:
                 m_scope = scope;
                 m_state = State::ListLoader;
 
-                m_list->add(value.release());
+                m_list->values().push_back(value.release());
                 m_valid = xmlTextReaderRead(m_reader) == 1;
             }
         }
@@ -414,7 +414,7 @@ private:
                 else
                 {
                     value->setValue(::strtol(reinterpret_cast<const char *>(m_value), NULL, 10));
-                    m_list->add(value.release());
+                    m_list->values().push_back(value.release());
                     m_valid = xmlTextReaderRead(m_reader) == 1;
                 }
             }
@@ -448,7 +448,7 @@ private:
                 else
                 {
                     value->setValue(reinterpret_cast<const char *>(m_value));
-                    m_list->add(value.release());
+                    m_list->values().push_back(value.release());
                     m_valid = xmlTextReaderRead(m_reader) == 1;
                 }
             }

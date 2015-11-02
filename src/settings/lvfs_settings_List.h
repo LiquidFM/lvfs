@@ -40,10 +40,8 @@ public:
     virtual ~List();
 
     Option *value() const { return m_value; }
+    Container &values() { return m_values; }
     const Container &values() const { return m_values; }
-
-    void add(Option *value);
-    void clear();
 
     virtual void accept(Visitor &visitor);
 

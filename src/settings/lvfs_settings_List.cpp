@@ -26,16 +26,6 @@ namespace Settings {
 
 List::~List()
 {
-    clear();
-}
-
-void List::add(Option *value)
-{
-    m_values.push_back(value);
-}
-
-void List::clear()
-{
     for (Container::iterator i = m_values.begin(); i != m_values.end(); i = m_values.erase(i))
         delete *i;
 }

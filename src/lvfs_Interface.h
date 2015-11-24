@@ -48,7 +48,8 @@ public:
     template <typename> class Adaptor;
 
 public:
-    inline Interface()
+    inline Interface() :
+        m_extender(NULL)
     {}
     virtual ~Interface();
 
@@ -64,6 +65,20 @@ public:
     inline const R *as_const() const
     { return static_cast<const R *>(const_cast<Interface *>(this)->interface(R::interfaceId())); }
 
+    inline Holder self() const
+    {
+        Interface *res = const_cast<Interface *>(this);
+
+        for (Interface *i = res->extender(); i != NULL; i = i->extender())
+            res = i;
+
+        return Holder::fromRawData(res);
+    }
+
+protected:
+    inline Interface *extender() const { return m_extender; }
+    inline void setExtender(Interface *original) { original->m_extender = this; }
+
 protected:
     virtual void *interface(uint32_t id) = 0;
     inline void *interface(const Holder &original, uint32_t id) const
@@ -73,6 +88,9 @@ protected:
         else
             return NULL;
     }
+
+private:
+    Interface *m_extender;
 };
 
 
@@ -81,7 +99,10 @@ class PLATFORM_MAKE_PUBLIC InterfaceExtender : public Interface
 public:
     inline InterfaceExtender(const Holder &original) :
         m_original(original)
-    {}
+    {
+        if (m_original.isValid())
+            setExtender(m_original.as<Interface>());
+    }
     virtual ~InterfaceExtender();
 
 protected:

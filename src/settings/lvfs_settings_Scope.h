@@ -33,8 +33,9 @@ public:
     typedef EFC::List<Option *> Container;
 
 public:
-    Scope(const char *id, Option *parent = 0) :
-        Option(id, parent)
+    Scope(const char *id, bool deleteItemsOnDestroy = false, Option *parent = 0) :
+        Option(id, parent),
+        m_deleteItemsOnDestroy(deleteItemsOnDestroy)
     {}
     virtual ~Scope();
 
@@ -45,6 +46,7 @@ public:
 
 protected:
     Container m_options;
+    bool m_deleteItemsOnDestroy;
 };
 
 }}

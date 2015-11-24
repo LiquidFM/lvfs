@@ -25,7 +25,11 @@ namespace LVFS {
 namespace Settings {
 
 Scope::~Scope()
-{}
+{
+    if (m_deleteItemsOnDestroy)
+        for (Container::iterator i = m_options.begin(); i != m_options.end(); i = m_options.erase(i))
+            delete *i;
+}
 
 void Scope::manage(Option *option)
 {

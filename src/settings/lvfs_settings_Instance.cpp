@@ -403,8 +403,6 @@ private:
 
             if (m_value == NULL)
                 m_valid = false;
-            else if (xmlTextReaderRead(m_reader) != 1)
-                m_valid = false;
             else
             {
                 EFC::ScopedPointer<IntOption> value(new (std::nothrow) IntOption(option.id(), option.defaultValue()));
@@ -415,7 +413,7 @@ private:
                 {
                     value->setValue(::strtol(reinterpret_cast<const char *>(m_value), NULL, 10));
                     m_list->values().push_back(value.release());
-                    m_valid = xmlTextReaderRead(m_reader) == 1;
+                    m_valid = xmlTextReaderRead(m_reader) == 1 && xmlTextReaderRead(m_reader) == 1;
                 }
             }
         }
@@ -437,8 +435,6 @@ private:
 
             if (m_value == NULL)
                 m_valid = false;
-            else if (xmlTextReaderRead(m_reader) != 1)
-                m_valid = false;
             else
             {
                 EFC::ScopedPointer<StringOption> value(new (std::nothrow) StringOption(option.id(), option.defaultValue()));
@@ -449,7 +445,7 @@ private:
                 {
                     value->setValue(reinterpret_cast<const char *>(m_value));
                     m_list->values().push_back(value.release());
-                    m_valid = xmlTextReaderRead(m_reader) == 1;
+                    m_valid = xmlTextReaderRead(m_reader) == 1 && xmlTextReaderRead(m_reader) == 1;
                 }
             }
         }
@@ -600,12 +596,10 @@ private:
 
             if (m_value == NULL)
                 m_valid = false;
-            else if (xmlTextReaderRead(m_reader) != 1)
-                m_valid = false;
             else
             {
                 value->setValue(::strtol(reinterpret_cast<const char *>(m_value), NULL, 10));
-                m_valid = xmlTextReaderRead(m_reader) == 1;
+                m_valid = xmlTextReaderRead(m_reader) == 1 && xmlTextReaderRead(m_reader) == 1;
             }
         }
 
@@ -636,12 +630,10 @@ private:
 
             if (m_value == NULL)
                 m_valid = false;
-            else if (xmlTextReaderRead(m_reader) != 1)
-                m_valid = false;
             else
             {
                 value->setValue(reinterpret_cast<const char *>(m_value));
-                m_valid = xmlTextReaderRead(m_reader) == 1;
+                m_valid = xmlTextReaderRead(m_reader) == 1 && xmlTextReaderRead(m_reader) == 1;
             }
         }
 

@@ -38,6 +38,10 @@ namespace LVFS {
 namespace Settings {
     class Scope;
 }
+namespace Core {
+namespace Settings {
+    class Page;
+}}
 
 class PLATFORM_MAKE_PUBLIC Package
 {
@@ -54,12 +58,18 @@ public:
         const Interface &plugin;
     };
 
+    struct Settings
+    {
+        LVFS::Settings::Scope *scope;
+        LVFS::Core::Settings::Page *page;
+    };
+
 public:
     Package();
     virtual ~Package();
 
     virtual const char *name() const = 0;
-    virtual Settings::Scope *settings() const = 0;
+    virtual Settings *settings() const = 0;
     virtual const Plugin **contentPlugins() const = 0;
     virtual const Plugin **protocolPlugins() const = 0;
 };

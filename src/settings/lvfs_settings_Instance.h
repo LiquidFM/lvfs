@@ -32,6 +32,10 @@ class Scope;
 
 class PLATFORM_MAKE_PUBLIC Instance
 {
+    PLATFORM_MAKE_NONCOPYABLE(Instance)
+    PLATFORM_MAKE_NONMOVEABLE(Instance)
+    PLATFORM_MAKE_STACK_ONLY
+
 public:
     Instance(const char *file);
     virtual ~Instance();

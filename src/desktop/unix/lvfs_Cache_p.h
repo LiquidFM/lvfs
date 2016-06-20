@@ -1,7 +1,7 @@
 /**
  * This file is part of lvfs.
  *
- * Copyright (C) 2011-2014 Dmitriy Vilkov, <dav.daemon@gmail.com>
+ * Copyright (C) 2011-2016 Dmitriy Vilkov, <dav.daemon@gmail.com>
  *
  * lvfs is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,13 +35,13 @@ class CacheEntry : public Implements<IEntry, IType>
 {
 public:
     CacheEntry(const char *fileName) :
-        m_filePath(strdup(fileName)),
-        m_fileName(strrchr(m_filePath, '/') + 1)
+        m_filePath(::strdup(fileName)),
+        m_fileName(::strrchr(m_filePath, '/') + 1)
     {}
 
     virtual ~CacheEntry()
     {
-        free(m_filePath);
+        ::free(m_filePath);
     }
 
     virtual const char *title() const { return m_fileName; }

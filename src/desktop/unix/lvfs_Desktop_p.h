@@ -1,7 +1,7 @@
 /**
  * This file is part of lvfs.
  *
- * Copyright (C) 2011-2014 Dmitriy Vilkov, <dav.daemon@gmail.com>
+ * Copyright (C) 2011-2016 Dmitriy Vilkov, <dav.daemon@gmail.com>
  *
  * lvfs is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,9 @@ namespace LVFS {
 
 #include "lvfs_AppsCache_p.h"
 
-namespace LVFS { static AppsCache appsCache; }
+namespace LVFS {
+    static AppsCache appsCache;
+}
 
 #include "../lvfs_MimeType.h"
 
@@ -53,7 +55,10 @@ namespace LVFS { static AppsCache appsCache; }
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
+
 #include <X11/Xlib.h>
+#undef Status
+
 #include <X11/Xatom.h>
 
 
@@ -170,9 +175,9 @@ Desktop::Locale::Locale() :
     m_buffer[MaxLenghtOfLocale - 1] = 0;
 
     if (const char *locale = ::getenv("LANG"))
-        strncpy(m_buffer, locale, MaxLenghtOfLocale - 1);
+        ::strncpy(m_buffer, locale, MaxLenghtOfLocale - 1);
     else
-        strcpy(m_buffer, "en_GB.UTF-8");
+        ::strcpy(m_buffer, "en_GB.UTF-8");
 
     Parser parser(m_buffer);
 
@@ -189,6 +194,61 @@ Desktop::Locale::Locale() :
         m_country = "GB";
         m_encoding = "UTF-8";
     }
+}
+
+
+Interface::Holder Desktop::Theme::icon(Actions::Enum context, IconSize iconSize) const
+{
+    static const char *context_str[] = {
+        "view-refresh",
+        "application-exit",
+        "edit-copy",
+        "edit-cut",
+        "edit-paste",
+        "document-properties",
+        "application-x-archive",
+        "archive-extract",
+        "system-search",
+        "document-open-data"
+    };
+
+    return iconCache.findIcon(context_str[context], iconSize, XdgThemeActions, ::LVFS::theme);
+}
+
+Interface::Holder Desktop::Theme::icon(Status::Enum context, IconSize iconSize) const
+{
+    static const char *context_str[] = {
+        "image-missing"
+    };
+
+    return iconCache.findIcon(context_str[context], iconSize, XdgThemeStatus, ::LVFS::theme);
+}
+
+Interface::Holder Desktop::Theme::icon(Devices::Enum context, IconSize iconSize) const
+{
+    static const char *context_str[] = {
+        "drive-harddisk",
+        "drive-removable-media",
+        "drive-removable-media-usb",
+        "drive-removable-media-usb-pendrive",
+        "media-flash",
+        "media-flash-memory-stick",
+        "media-flash-sd-mmc",
+        "media-flash-smart-media",
+        "media-floppy",
+        "media-optical",
+        "media-optical-audio",
+        "media-optical-blu-ray",
+        "media-optical-data",
+        "media-optical-dvd-video",
+        "media-optical-dvd",
+        "media-optical-mixed-cd",
+        "media-optical-recordable",
+        "media-optical-video",
+        "media-tape"
+    };
+
+    return iconCache.findIcon(context_str[context], iconSize, XdgThemeDevices, ::LVFS::theme);
 }
 
 
@@ -284,9 +344,9 @@ Desktop::Desktop()
     }
 
 #if PLATFORM_DE(KDE)
-    theme = DesktopPrivate::iconThemeName(kde_version);
+    ::LVFS::theme = DesktopPrivate::iconThemeName(kde_version);
 #else
-    theme = DesktopPrivate::iconThemeName();
+    ::LVFS::theme = DesktopPrivate::iconThemeName();
 #endif
 
     ::xdg_init();
@@ -355,12 +415,12 @@ Interface::Holder Desktop::typeOfFile(const IEntry *entry, IconType iconType) co
 
 Interface::Holder Desktop::typeOfDirectory() const
 {
-    return Interface::Holder(new (std::nothrow) MimeType(Module::DirectoryTypeName, "File system directory", iconCache.findMimeIcon(Module::DirectoryTypeName, SmallIcon, theme)));
+    return Interface::Holder(new (std::nothrow) MimeType(Module::DirectoryTypeName, "File system directory", iconCache.findMimeIcon(Module::DirectoryTypeName, SmallIcon, ::LVFS::theme)));
 }
 
 Interface::Holder Desktop::typeOfUnknownFile() const
 {
-    return Interface::Holder(new (std::nothrow) MimeType(XDG_MIME_TYPE_UNKNOWN, "Unknown file", iconCache.findMimeIcon(XDG_MIME_TYPE_UNKNOWN, SmallIcon, theme)));
+    return Interface::Holder(new (std::nothrow) MimeType(XDG_MIME_TYPE_UNKNOWN, "Unknown file", iconCache.findMimeIcon(XDG_MIME_TYPE_UNKNOWN, SmallIcon, ::LVFS::theme)));
 }
 
 Interface::Holder Desktop::loadMimeType(const char *mimeType, IconType iconType) const
@@ -389,20 +449,20 @@ Interface::Holder Desktop::loadMimeType(const char *mimeType, IconType iconType)
                     type->setIcon(app2->icon());
                 }
                 else
-                    type->setIcon(iconCache.findMimeIcon(XDG_MIME_TYPE_TEXTPLAIN, SmallIcon, theme));
+                    type->setIcon(iconCache.findMimeIcon(XDG_MIME_TYPE_TEXTPLAIN, SmallIcon, ::LVFS::theme));
 
                 break;
             }
 
             case OnlyTypeIcon:
             {
-                type->setIcon(iconCache.findMimeIcon(mimeType, XDG_MIME_TYPE_TEXTPLAIN, SmallIcon, theme));
+                type->setIcon(iconCache.findMimeIcon(mimeType, XDG_MIME_TYPE_TEXTPLAIN, SmallIcon, ::LVFS::theme));
                 break;
             }
 
             case AppIconIfNoTypeIcon:
             {
-                Interface::Holder icon = iconCache.findMimeIcon(mimeType, SmallIcon, theme);
+                Interface::Holder icon = iconCache.findMimeIcon(mimeType, SmallIcon, ::LVFS::theme);
 
                 if (icon.isValid())
                     type->setIcon(icon);
@@ -422,7 +482,7 @@ Interface::Holder Desktop::loadMimeType(const char *mimeType, IconType iconType)
                         type->setIcon(app2->icon());
                     }
                     else
-                        type->setIcon(iconCache.findMimeIcon(XDG_MIME_TYPE_TEXTPLAIN, SmallIcon, theme));
+                        type->setIcon(iconCache.findMimeIcon(XDG_MIME_TYPE_TEXTPLAIN, SmallIcon, ::LVFS::theme));
                 }
 
                 break;

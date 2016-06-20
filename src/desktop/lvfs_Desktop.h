@@ -1,7 +1,7 @@
 /**
  * This file is part of lvfs.
  *
- * Copyright (C) 2011-2014 Dmitriy Vilkov, <dav.daemon@gmail.com>
+ * Copyright (C) 2011-2016 Dmitriy Vilkov, <dav.daemon@gmail.com>
  *
  * lvfs is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,11 +67,72 @@ public:
         char m_buffer[MaxLenghtOfLocale];
     };
 
+    class Theme
+    {
+    public:
+        struct Actions
+        {
+            enum Enum
+            {
+                Refresh,
+                Exit,
+                Copy,
+                Cut,
+                Paste,
+                Properties,
+                Pack,
+                Extract,
+                Search,
+                Open
+            };
+        };
+
+        struct Status
+        {
+            enum Enum
+            {
+                Missing
+            };
+        };
+
+        struct Devices
+        {
+            enum Enum
+            {
+                HardDisk,
+                RemovableMedia,
+                RemovableMediaUsb,
+                RemovableMediaUsbPendrive,
+                Flash,
+                FlashMemoryStick,
+                FlashSdMmc,
+                FlashSmartMedia,
+                Floppy,
+                Optical,
+                OpticalAudio,
+                OpticalBluRay,
+                OpticalData,
+                OpticalDvdVideo,
+                OpticalDvd,
+                OpticalMixedCd,
+                OpticalRecordable,
+                OpticalVideo,
+                Tape
+            };
+        };
+
+        Interface::Holder icon(Actions::Enum context, IconSize iconSize = SmallIcon) const;
+        Interface::Holder icon(Status::Enum context, IconSize iconSize = SmallIcon) const;
+        Interface::Holder icon(Devices::Enum context, IconSize iconSize = SmallIcon) const;
+    };
+
 public:
     Desktop();
     ~Desktop();
 
     const Locale &locale() const { return m_locale; }
+    const Theme &theme() const { return m_theme; }
+
     Interface::Holder applications(const IType *type) const;
     Interface::Holder typeOfFile(const char *filename, IconType iconType = AppIconIfNoTypeIcon) const;
     Interface::Holder typeOfFile(const IEntry *file, IconType iconType = AppIconIfNoTypeIcon) const;
@@ -85,6 +146,7 @@ private:
 
 private:
     Locale m_locale;
+    Theme m_theme;
     Error m_lastError;
 };
 

@@ -1,0 +1,3 @@
+[submodule "libxdg"]
+	path = libxdg
+	url = git@github.com:LiquidFM/libxdg.git

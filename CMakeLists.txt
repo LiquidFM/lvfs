@@ -4,7 +4,7 @@ project (lvfs)
 project_library_header_default ()
 
 # 3rdparty
-list (APPEND ${PROJECT_NAME}_LIBS platform brolly efc xdg)
+list (APPEND ${PROJECT_NAME}_LIBS platform brolly efc)
 
 if (UNIX)
     find_package (X11 REQUIRED)
@@ -22,15 +22,15 @@ include_directories (${LIBXML2_INCLUDE_DIR})
 list (APPEND ${PROJECT_NAME}_LIBS ${LIBXML2_LIBRARIES})
 add_definitions (${LIBXML2_DEFINITIONS})
 
+add_subdirectory (libxdg)
+list (APPEND ${PROJECT_NAME}_LIBS xdg)
+
 # Sources
 add_subdirectory (src)
 
 # Target - lvfs
 add_library (lvfs SHARED ${${PROJECT_NAME}_SOURCES})
 target_link_libraries (lvfs ${${PROJECT_NAME}_LIBS})
-
-# Version
-build_version_file (lvfs 0.0.1)
 
 # Documentation
 add_documentation ("LVFS" 0.0.1 "Liquid Virtual File System")

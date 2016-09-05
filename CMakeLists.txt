@@ -4,7 +4,7 @@ project (lvfs)
 project_library_header_default ()
 
 # 3rdparty
-list (APPEND ${PROJECT_NAME}_LIBS platform brolly efc)
+list (APPEND ${PROJECT_NAME}_LIBS brolly efc)
 
 if (UNIX)
     find_package (X11 REQUIRED)
@@ -12,6 +12,8 @@ if (UNIX)
     list (APPEND ${PROJECT_NAME}_LIBS ${X11_LIBRARIES})
 
     list (APPEND ${PROJECT_NAME}_LIBS dl)
+
+    add_definitions (-DPLATFORM_DE_KDE=1)
 endif ()
 
 find_package (Threads REQUIRED)
@@ -22,7 +24,11 @@ include_directories (${LIBXML2_INCLUDE_DIR})
 list (APPEND ${PROJECT_NAME}_LIBS ${LIBXML2_LIBRARIES})
 add_definitions (${LIBXML2_DEFINITIONS})
 
-add_subdirectory (libxdg)
+set (BUILD_MIME_SPEC YES)
+set (BUILD_DESKTOP_SPEC YES)
+set (BUILD_THEMES_SPEC YES)
+set (BUILD_MENU_SPEC YES)
+add_subdirectory (libxdg/src)
 list (APPEND ${PROJECT_NAME}_LIBS xdg)
 
 # Sources
@@ -31,6 +37,7 @@ add_subdirectory (src)
 # Target - lvfs
 add_library (lvfs SHARED ${${PROJECT_NAME}_SOURCES})
 target_link_libraries (lvfs ${${PROJECT_NAME}_LIBS})
+add_dependencies (lvfs platform)
 
 # Documentation
 add_documentation ("LVFS" 0.0.1 "Liquid Virtual File System")

@@ -7,17 +7,19 @@
 #     LVFS_LIB     - the library files
 
 
-find_path (LVFS_INCLUDE
-           NAMES "lvfs/Module"
-           PATH_SUFFIXES include
-           DOC "Lvfs include directory")
+if (NOT LVFS_FOUND)
+    find_path (LVFS_INCLUDE
+               NAMES "lvfs/Module"
+               PATH_SUFFIXES include
+               DOC "Lvfs include directory")
 
-find_library (LVFS_LIB
-              NAMES lvfs
-              DOC "Lvfs library file")
+    find_library (LVFS_LIB
+                  NAMES lvfs
+                  DOC "Lvfs library file")
 
-# handle the QUIETLY and REQUIRED arguments and set LVFS_FOUND to TRUE if all listed variables are TRUE
-include (FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS (Lvfs DEFAULT_MSG LVFS_INCLUDE LVFS_LIB)
+    # handle the QUIETLY and REQUIRED arguments and set LVFS_FOUND to TRUE if all listed variables are TRUE
+    include (FindPackageHandleStandardArgs)
+    FIND_PACKAGE_HANDLE_STANDARD_ARGS (Lvfs DEFAULT_MSG LVFS_INCLUDE LVFS_LIB)
 
-mark_as_advanced (LVFS_INCLUDE LVFS_LIB)
+    mark_as_advanced (LVFS_INCLUDE LVFS_LIB)
+endif ()

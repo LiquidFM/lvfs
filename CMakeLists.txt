@@ -40,7 +40,7 @@ target_link_libraries (lvfs ${${PROJECT_NAME}_LIBS})
 add_dependencies (lvfs platform)
 
 # Documentation
-add_documentation ("LVFS" 0.0.1 "Liquid Virtual File System")
+add_documentation (lvfs 0.0.1 "Liquid Virtual File System")
 
 # Install rules
 install_header_files (lvfs "src/desktop/lvfs_Desktop.h:Desktop"
@@ -66,4 +66,5 @@ install_header_files (lvfs "src/desktop/lvfs_Desktop.h:Desktop"
                            "src/plugins/lvfs_IContentPlugin.h:plugins/IContentPlugin"
                            "src/plugins/lvfs_IProtocolPlugin.h:plugins/IProtocolPlugin"
                            "src/plugins/lvfs_Package.h:plugins/Package")
+install_cmake_files ("cmake/FindLvfs.cmake")
 install_target (lvfs)

@@ -1,7 +1,7 @@
 project (lvfs)
 
 # Project header
-project_library_header_default ()
+project_header_default ("POSITION_INDEPENDENT_CODE:YES")
 
 # 3rdparty
 list (APPEND ${PROJECT_NAME}_LIBS brolly efc)

@@ -17,24 +17,12 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LVFS_PACKAGE_H_
-#define LVFS_PACKAGE_H_
+#include "lvfs_IPackage.h"
 
-#include <lvfs/Interface>
-
-
-#define DECLARE_PLUGINS_PACKAGE(CLASS)      \
-    extern "C" PLATFORM_MAKE_PUBLIC         \
-    const ::LVFS::Interface &lvfs_package() \
-    {                                       \
-        static const CLASS package;         \
-        return package;                     \
-    }
 
 namespace LVFS {
 
-typedef const Interface &(*PackageFunction)();
+IPackage::~IPackage()
+{}
 
 }
-
-#endif /* LVFS_PACKAGE_H_ */

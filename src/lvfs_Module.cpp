@@ -20,7 +20,11 @@
 #include "lvfs_Module.h"
 
 #include <lvfs/IEntry>
+#include <lvfs/plugins/IPackage>
+#include <lvfs/plugins/IContentPlugin>
+#include <lvfs/plugins/IProtocolPlugin>
 #include <brolly/assert.h>
+
 #include <cstring>
 #include <cstdio>
 
@@ -147,38 +151,30 @@ void Module::processPlugin(const char *fileName)
         /* Clear any existing error */
         dlerror();
 
-        Package::PluginFunction func;
-
-        if (*(void **) (&func) = dlsym(plugin.handle, "lvfs_plugin_package"))
+        if (plugin.package = reinterpret_cast<PackageFunction>(dlsym(plugin.handle, "lvfs_package")))
         {
-            plugin.package = func();
+            const IPackage *package = plugin.package().as<IPackage>();
 
-            if (LIKELY(plugin.package != NULL))
+            if (UNLIKELY(package == NULL))
+                fprintf(stderr, "Package \"%s\" does not implement IPackage interface\n", fileName);
+            else
             {
-                if (const Package::Plugin **p = plugin.package->contentPlugins())
-                    for (const Package::Plugin *pl = *p; pl != NULL; pl = *++p)
+                if (const IPackage::Plugin **p = package->contentPlugins())
+                    for (const IPackage::Plugin *pl = *p; pl != NULL; pl = *++p)
                         m_contentPlugins[pl->type].push_back(pl->plugin.as<IContentPlugin>());
 
-                if (const Package::Plugin **p = plugin.package->protocolPlugins())
-                    for (const Package::Plugin *pl = *p; pl != NULL; pl = *++p)
+                if (const IPackage::Plugin **p = package->protocolPlugins())
+                    for (const IPackage::Plugin *pl = *p; pl != NULL; pl = *++p)
                         m_protocolPlugins[pl->type].push_back(pl->plugin.as<IProtocolPlugin>());
 
                 m_plugins.push_back(plugin);
             }
-            else
-            {
-                dlclose(plugin.handle);
-            }
         }
         else
-        {
             fprintf(stderr, "%s\n", dlerror());
-        }
     }
     else
-    {
         fprintf(stderr, "%s\n", dlerror());
-    }
 }
 
 

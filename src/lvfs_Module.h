@@ -34,6 +34,9 @@
 
 namespace LVFS {
 
+class IContentPlugin;
+class IProtocolPlugin;
+
 class PLATFORM_MAKE_PUBLIC Module
 {
     PLATFORM_MAKE_NONCOPYABLE(Module)
@@ -70,7 +73,7 @@ private:
     struct Plugin
     {
         void *handle;
-        const Package *package;
+        PackageFunction package;
     };
 
     class String

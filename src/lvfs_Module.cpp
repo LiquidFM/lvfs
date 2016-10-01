@@ -1,7 +1,7 @@
 /**
  * This file is part of lvfs.
  *
- * Copyright (C) 2011-2014 Dmitriy Vilkov, <dav.daemon@gmail.com>
+ * Copyright (C) 2011-2016 Dmitriy Vilkov, <dav.daemon@gmail.com>
  *
  * lvfs is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,10 @@
 
 #include <dlfcn.h>
 #include <linux/limits.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <fnmatch.h>
+#include <unistd.h>
 
 
 WARN_UNUSED_RETURN_OFF
@@ -50,12 +54,36 @@ Module::Module(Settings::Instance &settings) :
     ASSERT(s_instance == NULL);
     s_instance = this;
 
-    processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-core/liblvfs-core.so");
-    processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-db/liblvfs-db.so");
-    processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-arc/liblvfs-arc.so");
-    processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-qimg/liblvfs-qimg.so");
-    processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-bits/liblvfs-bits.so");
-    processPlugin("/media/WORKSPACE/github.com/qfm/workspace/root/build/lvfs-qplayer/liblvfs-qplayer.so");
+    if (const char *path = getenv("LVFS_PLUGINS_DIR"))
+        if (DIR *dir = opendir(path))
+        {
+            long int name_max = pathconf(path, _PC_NAME_MAX);
+
+            if (name_max == -1)
+                name_max = 255;
+
+            char buf[offsetof(struct dirent, d_name) + name_max + 1];
+            struct dirent *entry = NULL;
+
+            readdir_r(dir, (struct dirent *)&buf, &entry);
+
+            while (entry != NULL)
+            {
+                if (fnmatch("liblvfs-*.so", entry->d_name, 0) == 0)
+                {
+                    char buf[MaxUriLength];
+
+                    if (UNLIKELY(std::snprintf(buf, sizeof(buf), "%s/%s", path, entry->d_name) < 0))
+                        break;
+
+                    processPlugin(buf);
+                }
+
+                readdir_r(dir, (struct dirent *)&buf, &entry);
+            }
+
+            closedir(dir);
+        }
 }
 
 Module::~Module()

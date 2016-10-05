@@ -172,7 +172,7 @@ Interface::Holder Module::internalOpen(const Interface::Holder &file)
 
 void Module::processPlugin(const char *fileName)
 {
-    Plugin plugin = { dlopen(fileName, RTLD_LAZY | RTLD_LOCAL), NULL };
+    Plugin plugin = { dlopen(fileName, RTLD_LAZY | RTLD_GLOBAL), NULL };
 
     if (plugin.handle)
     {

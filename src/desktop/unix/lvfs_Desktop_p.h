@@ -251,6 +251,11 @@ Interface::Holder Desktop::Theme::icon(Devices::Enum context, IconSize iconSize)
     return iconCache.findIcon(context_str[context], iconSize, XdgThemeDevices, ::LVFS::theme);
 }
 
+Interface::Holder Desktop::Theme::icon(const char *context, IconSize iconSize) const
+{
+    return iconCache.findIcon(context, iconSize, XdgThemeDevices, ::LVFS::theme);
+}
+
 
 Desktop::Desktop()
 {

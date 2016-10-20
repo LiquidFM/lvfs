@@ -124,6 +124,7 @@ public:
         Interface::Holder icon(Actions::Enum context, IconSize iconSize = SmallIcon) const;
         Interface::Holder icon(Status::Enum context, IconSize iconSize = SmallIcon) const;
         Interface::Holder icon(Devices::Enum context, IconSize iconSize = SmallIcon) const;
+        Interface::Holder icon(const char *context, IconSize iconSize = SmallIcon) const;
     };
 
 public:

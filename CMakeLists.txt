@@ -36,6 +36,7 @@ add_subdirectory (src)
 
 # Target - lvfs
 add_library (lvfs SHARED ${${PROJECT_NAME}_SOURCES})
+target_compile_features (lvfs PUBLIC cxx_std_14)
 target_link_libraries (lvfs ${${PROJECT_NAME}_LIBS})
 add_dependencies (lvfs platform)
 

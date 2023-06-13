@@ -1,7 +1,7 @@
 /**
  * This file is part of lvfs.
  *
- * Copyright (C) 2011-2014 Dmitriy Vilkov, <dav.daemon@gmail.com>
+ * Copyright (C) 2011-2023 Dmitriy Vilkov, <dav.daemon@gmail.com>
  *
  * lvfs is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
  * along with lvfs. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LVFS_IINTERFACE_H_
-#define LVFS_IINTERFACE_H_
+#ifndef LVFS_INTERFACE_H_
+#define LVFS_INTERFACE_H_
 
 #include <cstddef>
 #include <cstdint>
@@ -28,14 +28,12 @@
 
 namespace LVFS {
 
-
-#if PLATFORM_COMPILER_SUPPORTS(CXX_CONSTEXPR)
-#define DECLARE_INTERFACE(Name) public: static inline CONSTEXPR const char *interfaceName() { return #Name; } \
-                                        static inline CONSTEXPR uint32_t interfaceId() { enum { Id = ::LVFS::crc32(interfaceName()) }; return Id; }
-#else
-#define DECLARE_INTERFACE(Name) public: static inline CONSTEXPR const char *interfaceName() { return #Name; } \
-                                        static inline CONSTEXPR uint32_t interfaceId() { return ::LVFS::crc32(interfaceName()); }
-#endif
+#define DECLARE_INTERFACE(Name)                       \
+    public:                                           \
+        static CONSTEXPR const char *interfaceName()  \
+        { return #Name; }                             \
+        static CONSTEXPR uint_least32_t interfaceId() \
+        { return ::LVFS::crc32(#Name); }
 
 
 class Interface;
@@ -300,11 +298,7 @@ public:
  *  MaxLen: 268 435 455 байт (2 147 483 647 бит) - обнаружение
  *   одинарных, двойных, пакетных и всех нечетных ошибок
  */
-#ifndef CONSTEXPR
-static uint_least32_t Crc32Table[256] =
-#else
-CONSTEXPR uint_least32_t Crc32Table[256] =
-#endif
+static CONSTEXPR uint_least32_t Crc32Table[256] =
 {
     0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA,
     0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
@@ -372,26 +366,43 @@ CONSTEXPR uint_least32_t Crc32Table[256] =
     0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D
 };
 
-static inline CONSTEXPR uint_least32_t __crc32__(const char *buf, uint_least32_t crc)
+template<typename T, std::size_t Index>
+struct crc32_value : public crc32_value<T, Index - 1>
 {
-    return buf[0] ? __crc32__(buf + 1, (crc >> 8) ^ Crc32Table[(crc ^ *buf) & 0xFF]) : crc ^ 0xFFFFFFFF;
-}
+    typedef crc32_value<T, Index - 1> base;
 
-static inline CONSTEXPR uint_least32_t crc32(const char *buf)
+    static CONSTEXPR uint_least32_t value(const T *buf)
+    {
+        return (base::value(buf) >> 8) ^ Crc32Table[(base::value(buf) ^ buf[Index]) & 0xFF];
+    }
+};
+
+template<typename T>
+struct crc32_value<T, 0>
 {
-    return __crc32__(buf + 1, (0xFFFFFFFF >> 8) ^ Crc32Table[(0xFFFFFFFF ^ *buf) & 0xFF]);
-}
+    static CONSTEXPR uint_least32_t value(const T *buf)
+    {
+        return (0xFFFFFFFF >> 8) ^ Crc32Table[(0xFFFFFFFF ^ buf[0]) & 0xFF];
+    }
+};
 
-static inline uint_least32_t crc32(const unsigned char * buf, size_t len)
+template<typename T, std::size_t Size>
+struct crc32_entry_point : public crc32_value<T, Size - 1>
 {
-    uint_least32_t crc = 0xFFFFFFFF;
+    typedef crc32_value<T, Size - 1> base;
 
-    while (len--)
-        crc = (crc >> 8) ^ Crc32Table[(crc ^ *buf++) & 0xFF];
+    static CONSTEXPR uint_least32_t value(T (&buf)[Size])
+    {
+        return base::value(buf) ^ 0xFFFFFFFF;
+    }
+};
 
-    return crc ^ 0xFFFFFFFF;
+template<typename T, std::size_t Size>
+static CONSTEXPR uint_least32_t crc32(T (&var)[Size])
+{
+    return crc32_entry_point<T, Size>::value(var);
 }
 
 }
 
-#endif /* LVFS_IINTERFACE_H_ */
+#endif /* LVFS_INTERFACE_H_ */

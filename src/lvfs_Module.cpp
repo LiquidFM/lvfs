@@ -1,7 +1,7 @@
 /**
  * This file is part of lvfs.
  *
- * Copyright (C) 2011-2016 Dmitriy Vilkov, <dav.daemon@gmail.com>
+ * Copyright (C) 2011-2023 Dmitriy Vilkov, <dav.daemon@gmail.com>
  *
  * lvfs is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include <lvfs/plugins/IProtocolPlugin>
 #include <brolly/assert.h>
 
+#include <cstdlib>
 #include <cstring>
 #include <cstdio>
 
@@ -54,10 +55,10 @@ Module::Module(Settings::Instance &settings) :
     ASSERT(s_instance == NULL);
     s_instance = this;
 
-    if (const char *path = getenv("LVFS_PLUGINS_DIR"))
-        if (DIR *dir = opendir(path))
+    if (const char *path = ::getenv("LVFS_PLUGINS_DIR"))
+        if (DIR *dir = ::opendir(path))
         {
-            long int name_max = pathconf(path, _PC_NAME_MAX);
+            long int name_max = ::pathconf(path, _PC_NAME_MAX);
 
             if (name_max == -1)
                 name_max = 255;
@@ -65,11 +66,11 @@ Module::Module(Settings::Instance &settings) :
             char buf[offsetof(struct dirent, d_name) + name_max + 1];
             struct dirent *entry = NULL;
 
-            readdir_r(dir, (struct dirent *)&buf, &entry);
+            ::readdir_r(dir, (struct dirent *)&buf, &entry);
 
             while (entry != NULL)
             {
-                if (fnmatch("liblvfs-*.so", entry->d_name, 0) == 0)
+                if (::fnmatch("liblvfs-*.so", entry->d_name, 0) == 0)
                 {
                     char buf[MaxUriLength];
 
@@ -79,10 +80,10 @@ Module::Module(Settings::Instance &settings) :
                     processPlugin(buf);
                 }
 
-                readdir_r(dir, (struct dirent *)&buf, &entry);
+                ::readdir_r(dir, (struct dirent *)&buf, &entry);
             }
 
-            closedir(dir);
+            ::closedir(dir);
         }
 }
 
@@ -95,7 +96,7 @@ Module::~Module()
     m_protocolPlugins.clear();
 
     for (auto i : m_plugins)
-        dlclose(i.handle);
+        ::dlclose(i.handle);
 }
 
 const Desktop &Module::desktop()
@@ -121,10 +122,10 @@ Interface::Holder Module::internalOpen(const char *uri, Error &error)
     char buffer[MaxSchemaLength] = { 'f', 'i', 'l', 'e' };
     Interface::Holder res;
 
-    if (const char *delim = strstr(uri, SchemaDelimiter))
+    if (const char *delim = ::strstr(uri, SchemaDelimiter))
         if (delim - uri < MaxSchemaLength)
         {
-            memcpy(buffer, uri, delim - uri);
+            ::memcpy(buffer, uri, delim - uri);
             buffer[delim - uri] = 0;
             uri = delim + SchemaDelimiterLength;
         }
@@ -172,19 +173,19 @@ Interface::Holder Module::internalOpen(const Interface::Holder &file)
 
 void Module::processPlugin(const char *fileName)
 {
-    Plugin plugin = { dlopen(fileName, RTLD_LAZY | RTLD_GLOBAL), NULL };
+    Plugin plugin = { ::dlopen(fileName, RTLD_LAZY | RTLD_GLOBAL), NULL };
 
     if (plugin.handle)
     {
         /* Clear any existing error */
-        dlerror();
+        ::dlerror();
 
-        if (plugin.package = reinterpret_cast<PackageFunction>(dlsym(plugin.handle, "lvfs_package")))
+        if (plugin.package = reinterpret_cast<PackageFunction>(::dlsym(plugin.handle, "lvfs_package")))
         {
             const IPackage *package = plugin.package().as<IPackage>();
 
             if (UNLIKELY(package == NULL))
-                fprintf(stderr, "Package \"%s\" does not implement IPackage interface\n", fileName);
+                ::fprintf(stderr, "Package \"%s\" does not implement IPackage interface\n", fileName);
             else
             {
                 if (const IPackage::Plugin **p = package->contentPlugins())
@@ -199,21 +200,21 @@ void Module::processPlugin(const char *fileName)
             }
         }
         else
-            fprintf(stderr, "%s\n", dlerror());
+            ::fprintf(stderr, "%s\n", ::dlerror());
     }
     else
-        fprintf(stderr, "%s\n", dlerror());
+        ::fprintf(stderr, "%s\n", ::dlerror());
 }
 
 
 bool Module::String::operator<(const String &other) const
 {
-    return strcmp(m_string, other.m_string) < 0;
+    return ::strcmp(m_string, other.m_string) < 0;
 }
 
 bool Module::String::operator==(const String &other) const
 {
-    return strcmp(m_string, other.m_string) == 0;
+    return ::strcmp(m_string, other.m_string) == 0;
 }
 
 }

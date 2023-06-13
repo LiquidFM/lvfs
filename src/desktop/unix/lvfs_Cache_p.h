@@ -1,7 +1,7 @@
 /**
  * This file is part of lvfs.
  *
- * Copyright (C) 2011-2016 Dmitriy Vilkov, <dav.daemon@gmail.com>
+ * Copyright (C) 2011-2023 Dmitriy Vilkov, <dav.daemon@gmail.com>
  *
  * lvfs is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 
 #include <xdg/xdg.h>
 
+#include <cstdlib>
 #include <cstring>
 #include <pthread.h>
 
